@@ -48,7 +48,7 @@ const baselineCodeJSON: CodeJSON = {
   maturityModelTier: 0
 };
 
-async function getCalclatedMetaData(): Promise<Partial<CodeJSON>> {
+async function getMetaData(): Promise<Partial<CodeJSON>> {
   const partialCodeJSON = await helpers.calculateMetaData()
 
   return {
@@ -70,7 +70,7 @@ export async function run(): Promise<void> {
 
     const repoCodePath = path.join(workspaceDir, 'code.json');
     const existing = helpers.readJSON(repoCodePath);
-    const autoFields = await getCalclatedMetaData();
+    const autoFields = await getMetaData();
     
     let finalJson: CodeJSON;
     

@@ -4,4 +4,5 @@ export declare function calculateMetaData(): Promise<{
     laborHours: number;
     date: CodeDate;
 } | null>;
+export declare function getDateFields(): Promise<CodeDate>;
 export declare function getLaborHours(): Promise<number>;

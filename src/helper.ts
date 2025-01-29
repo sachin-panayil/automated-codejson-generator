@@ -16,6 +16,22 @@ export function readJSON(filepath: string): CodeJSON | null {
 }
 
 export async function calculateMetaData() {
+  try {
+    const laborHours = await getLaborHours()
+    const dateFeilds = await getDateFields()
+    
+    return {
+      laborHours: laborHours,
+      date: dateFeilds
+    }
+
+  } catch (error) {
+    console.log(`Error with calculating meta data: ${error}`)
+    return null
+  }
+}
+
+export async function getDateFields(): Promise<CodeDate> {
   const token = core.getInput("github-token", { required: true})
   const octokit = github.getOctokit(token)
   const { owner, repo } = github.context.repo
@@ -31,14 +47,14 @@ export async function calculateMetaData() {
       metaDataLastUpdated: new Date().toISOString()
     }
 
-    return {
-      laborHours: await getLaborHours(),
-      date: dates
-    }
-
+    return dates
   } catch (error) {
-    console.log(`Error with calculating meta data: ${error}`)
-    return null
+    console.log(`Error getting date: ${error}`)
+    return {
+      created: "",
+      lastModified: "",
+      metaDataLastUpdated: "" 
+    }
   }
 }
 

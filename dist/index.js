@@ -31237,6 +31237,20 @@ function readJSON(filepath) {
     }
 }
 async function calculateMetaData() {
+    try {
+        const laborHours = await getLaborHours();
+        const dateFeilds = await getDateFields();
+        return {
+            laborHours: laborHours,
+            date: dateFeilds
+        };
+    }
+    catch (error) {
+        console.log(`Error with calculating meta data: ${error}`);
+        return null;
+    }
+}
+async function getDateFields() {
     const token = coreExports.getInput("github-token", { required: true });
     const octokit = githubExports.getOctokit(token);
     const { owner, repo } = githubExports.context.repo;
@@ -31249,14 +31263,15 @@ async function calculateMetaData() {
             lastModified: repoData.data.updated_at,
             metaDataLastUpdated: new Date().toISOString()
         };
-        return {
-            laborHours: await getLaborHours(),
-            date: dates
-        };
+        return dates;
     }
     catch (error) {
-        console.log(`Error with calculating meta data: ${error}`);
-        return null;
+        console.log(`Error getting date: ${error}`);
+        return {
+            created: "",
+            lastModified: "",
+            metaDataLastUpdated: ""
+        };
     }
 }
 async function getLaborHours() {
@@ -31324,7 +31339,7 @@ const baselineCodeJSON = {
     repositoryHost: 'github',
     maturityModelTier: 0
 };
-async function getCalclatedMetaData() {
+async function getMetaData() {
     const partialCodeJSON = await calculateMetaData();
     return {
         laborHours: partialCodeJSON?.laborHours,
@@ -31343,7 +31358,7 @@ async function run() {
         }
         const repoCodePath = require$$1$1.join(workspaceDir, 'code.json');
         const existing = readJSON(repoCodePath);
-        const autoFields = await getCalclatedMetaData();
+        const autoFields = await getMetaData();
         let finalJson;
         if (!existing) {
             finalJson = {
