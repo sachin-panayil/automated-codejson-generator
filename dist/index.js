@@ -31359,6 +31359,7 @@ async function run() {
                 ...autoFields
             };
             coreExports.info('Updated existing code.json with auto-calculated fields.');
+            coreExports.info(JSON.stringify(finalJson));
         }
         require$$1.writeFileSync(repoCodePath, JSON.stringify(finalJson, null, 2));
         coreExports.info(`Successfully updated code.json at ${repoCodePath}`);

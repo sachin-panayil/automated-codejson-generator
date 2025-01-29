@@ -87,6 +87,7 @@ export async function run(): Promise<void> {
         ...autoFields
       };
       core.info('Updated existing code.json with auto-calculated fields.');
+      core.info(JSON.stringify(finalJson))
     }
     
     fs.writeFileSync(repoCodePath, JSON.stringify(finalJson, null, 2));

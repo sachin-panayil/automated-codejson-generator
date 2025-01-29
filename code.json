@@ -1,57 +1,10 @@
 {
-  "name": "metrics",
-  "description": "Experimentations in Open Source Repository Metrics",
-  "longDescription": "The CMS Repository Metrics Website shows an overview of software development activity across open source projects within a specified organization. This webpage is meant to be used by developers and program managers interested in repository health within CMS open source projects.",
-  "status": "Beta",
-  "permissions": {
-    "license": [
-      {
-        "name": "CC0-1.0",
-        "URL": "https://creativecommons.org/publicdomain/zero/1.0/"
-      }
-    ],
-    "usageType": "openSource",
-    "exemptionText": ""
-  },
-  "organization": "Centers for Medicare & Medicaid Services",
-  "repositoryURL": "https://github.com/DSACMS/metrics",
-  "vcs": "git",
-  "laborHours": 3000,
-  "platforms": ["web"],
-  "categories": ["data-visualization"],
-  "softwareType": "standalone/web",
-  "languages": ["CSS", "Shell", "Python", "Liquid", "JavaScript"],
-  "maintenance": "community",
-  "date": {
-    "created": "2023-07-18T14:10:00-04:00",
-    "lastModified": "2025-01-12T10:48:00-05:00",
-    "metaDataLastUpdated": "2025-01-14T12:00:00-05:00"
-  },
-  "tags": [
-    "github",
-    "python",
-    "git",
-    "github-pages",
-    "website",
-    "opensource",
-    "metrics",
-    "health",
-    "data-visualization",
-    "data-collection",
-    "html-css-javascript",
-    "cmsgov"
-  ],
-  "contact": {
-    "email": "opensource@cms.hhs.gov",
-    "name": "CMS Open Source Program Office"
-  },
-  "localisation": false,
-  "repositoryType": "application",
-  "userInput": false,
+  "projectType": "Website",
+  "userInput": "No",
   "fismaLevel": "Low",
   "group": "CMS/OA/DSAC",
-  "subsetInHealthcare": ["Operational"],
-  "userType": ["Government"],
-  "repositoryHost": "github.com/CMSgov",
-  "maturityModelTier": 3
+  "subsetInHealthcare": "Operational",
+  "userType": "Government",
+  "repositoryHost": "Github.com",
+  "maturityModelTier": "3"
 }
