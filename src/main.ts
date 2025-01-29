@@ -58,7 +58,7 @@ async function getCalclatedMetaData(): Promise<Partial<CodeJSON>> {
 }
 
 export async function run(): Promise<void> {
-  const laborHours = helpers.getLaborHours()
+  const laborHours = await helpers.getLaborHours()
   console.log(laborHours)
 
 }

@@ -31247,7 +31247,7 @@ async function getLaborHours() {
 }
 
 async function run() {
-    const laborHours = getLaborHours();
+    const laborHours = await getLaborHours();
     console.log(laborHours);
 }
 
