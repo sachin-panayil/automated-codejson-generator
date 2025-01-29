@@ -7,8 +7,20 @@ import * as fs from 'fs'
 
 import { CodeJSON, Date as CodeDate } from './model.js'
 
+const token = core.getInput("github-token", { required: true})
+
 const MyOctokit = ActionKit.plugin(createPullRequest)
-const token = core.getInput("github-token", { required: false})
+
+const octokit = new MyOctokit({
+  auth: token,
+  log: {
+    debug: core.debug,
+    info: core.info,
+    warn: core.warning,
+    error: core.error
+  }
+})
+
 
 export function readJSON(filepath: string): CodeJSON | null {
   try {
@@ -92,16 +104,6 @@ export async function getLaborHours(): Promise<number> {
 export async function sendPR(content: string) {
   const { owner, repo } = github.context.repo
   const runNumber = getRunNumber()
-
-  const octokit = new MyOctokit({
-    auth: token,
-    log: {
-      debug: core.debug,
-      info: core.info,
-      warn: core.warning,
-      error: core.error
-    }
-  })
 
   const pr = await octokit.createPullRequest({
     owner,

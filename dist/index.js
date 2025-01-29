@@ -62203,8 +62203,17 @@ createPullRequest.VERSION = VERSION;
 
 var execExports = requireExec();
 
+const token = coreExports.getInput("github-token", { required: true });
 const MyOctokit = Octokit.plugin(createPullRequest);
-const token = coreExports.getInput("github-token", { required: false });
+const octokit = new MyOctokit({
+    auth: token,
+    log: {
+        debug: coreExports.debug,
+        info: coreExports.info,
+        warn: coreExports.warning,
+        error: coreExports.error
+    }
+});
 function readJSON(filepath) {
     try {
         const fileContent = require$$1.readFileSync(filepath, 'utf8');
@@ -62277,15 +62286,6 @@ async function getLaborHours() {
 async function sendPR(content) {
     const { owner, repo } = githubExports.context.repo;
     const runNumber = getRunNumber();
-    const octokit = new MyOctokit({
-        auth: token,
-        log: {
-            debug: coreExports.debug,
-            info: coreExports.info,
-            warn: coreExports.warning,
-            error: coreExports.error
-        }
-    });
     const pr = await octokit.createPullRequest({
         owner,
         repo,
