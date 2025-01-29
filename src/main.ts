@@ -1,27 +1,66 @@
-import * as core from '@actions/core'
-import { wait } from './wait.js'
+import { CodeJSON } from './model.js'
+import * as helpers from './helper.js'
 
-/**
- * The main function for the action.
- *
- * @returns Resolves when the action is complete.
- */
-export async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
+const baselineCodeJSON: CodeJSON = {
+  name: '',
+  description: '',
+  longDescription: '',
+  status: '',
+  permissions: {
+    license: [{
+      name: '',
+      URL: ''
+    }],
+    usageType: '',
+    exemptionText: ''
+  },
+  organization: '',
+  repositoryURL: '',
+  vcs: 'git',
+  laborHours: 0,
+  platforms: [],
+  categories: [],
+  softwareType: '',
+  languages: [],
+  maintenance: '',
+  date: {
+    created: '',         
+    lastModified: '',      
+    metaDataLastUpdated: '' 
+  },
+  tags: [],
+  contact: {
+    email: '',
+    name: ''
+  },
+  localisation: false,
+  repositoryType: '',
+  userInput: false,
+  fismaLevel: '',
+  group: '',
+  subsetInHealthcare: [],
+  userType: [],
+  repositoryHost: 'github',
+  maturityModelTier: 0
+};
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+async function getCalclatedMetaData(): Promise<Partial<CodeJSON>> {
+  const partialCodeJSON = await helpers.calculateMetaData()
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    // Fail the workflow run if an error occurs
-    if (error instanceof Error) core.setFailed(error.message)
+  return {
+    laborHours: partialCodeJSON?.laborHours,
+    date: {
+      created: partialCodeJSON?.date.created ?? "", // need better default values here
+      lastModified: partialCodeJSON?.date.lastModified ?? "",
+      metaDataLastUpdated: partialCodeJSON?.date.metaDataLastUpdated ?? ""
+    }
   }
 }
+
+export async function run(): Promise<void> {
+  const laborHours = helpers.getLaborHours()
+  console.log(laborHours)
+
+}
+
+
