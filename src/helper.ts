@@ -1,26 +1,20 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {Octokit as ActionKit} from '@octokit/action'
-import {createPullRequest} from "octokit-plugin-create-pull-request"
-import { exec } from '@actions/exec';
+import { createPullRequest } from "octokit-plugin-create-pull-request"
+import { exec } from '@actions/exec'
 import * as fs from 'fs'
+import { Octokit } from '@octokit/core'
 
 import { CodeJSON, Date as CodeDate } from './model.js'
 
-const token = core.getInput("github-token", { required: true})
+const token = core.getInput("github-token", { required: true })
 
-const MyOctokit = ActionKit.plugin(createPullRequest)
-
+const MyOctokit = Octokit.plugin(createPullRequest)
 const octokit = new MyOctokit({
-  auth: token,
-  log: {
-    debug: core.debug,
-    info: core.info,
-    warn: core.warning,
-    error: core.error
-  }
+  auth: token
 })
 
+const githubKit = github.getOctokit(token)
 
 export function readJSON(filepath: string): CodeJSON | null {
   try {
@@ -49,12 +43,11 @@ export async function calculateMetaData() {
 }
 
 export async function getDateFields(): Promise<CodeDate> {
-  const octokit = github.getOctokit(token)
   const { owner, repo } = github.context.repo
 
   try {
     const [repoData] = await Promise.all([
-      octokit.rest.repos.get({ owner, repo }),
+      githubKit.rest.repos.get({ owner, repo }),
     ]);
 
     const dates: CodeDate = {
