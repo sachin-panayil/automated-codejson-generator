@@ -31224,17 +31224,14 @@ var githubExports = requireGithub();
 
 async function getLaborHours() {
     try {
-        // const token = core.getInput('github-token', { required: true });
-        const octokit = githubExports.getOctokit("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");
+        const token = coreExports.getInput('github-token', { required: true });
+        const octokit = githubExports.getOctokit(token);
         const { owner, repo } = githubExports.context.repo;
-        // Get repository stats including languages
         const [repoData, languages] = await Promise.all([
             octokit.rest.repos.get({ owner, repo }),
             octokit.rest.repos.listLanguages({ owner, repo })
         ]);
-        // Sum up total lines across all languages
         const totalLines = Object.values(languages.data).reduce((sum, lines) => sum + lines, 0);
-        // COCOMO II coefficients
         const c = 2.5;
         const d = 0.38;
         const a = 2.4;
