@@ -1,3 +1,7 @@
+import * as core from '@actions/core';
+import * as path from 'path';
+import * as fs from 'fs';
+
 import { CodeJSON } from './model.js'
 import * as helpers from './helper.js'
 
@@ -58,9 +62,43 @@ async function getCalclatedMetaData(): Promise<Partial<CodeJSON>> {
 }
 
 export async function run(): Promise<void> {
-  const laborHours = await helpers.getLaborHours()
-  console.log(laborHours)
+  try {
+    const workspaceDir = process.env.GITHUB_WORKSPACE;
+    if (!workspaceDir) {
+      throw new Error('GITHUB_WORKSPACE not set');
+    }
 
+    const repoCodePath = path.join(workspaceDir, 'code.json');
+    const existing = helpers.readJSON(repoCodePath);
+    const autoFields = await getCalclatedMetaData();
+    
+    let finalJson: CodeJSON;
+    
+    if (!existing) {
+      finalJson = {
+        ...baselineCodeJSON,
+        ...autoFields
+      };
+      core.info('No existing code.json found. Creating new file with baseline schema.');
+    } else {
+      finalJson = {
+        ...baselineCodeJSON,
+        ...existing,
+        ...autoFields
+      };
+      core.info('Updated existing code.json with auto-calculated fields.');
+    }
+    
+    fs.writeFileSync(repoCodePath, JSON.stringify(finalJson, null, 2));
+    core.info(`Successfully updated code.json at ${repoCodePath}`);
+    
+  } catch (error) {
+    if (error instanceof Error) {
+      core.setFailed(error.message);
+    } else {
+      core.setFailed('An unexpected error occurred');
+    }
+  }
 }
 
 

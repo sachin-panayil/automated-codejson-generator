@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import { exec } from '@actions/exec';
 import * as fs from 'fs'
 
 import { CodeJSON, Date as CodeDate } from './model.js'
@@ -31,7 +32,7 @@ export async function calculateMetaData() {
     }
 
     return {
-      laborHours: 0,
+      laborHours: await getLaborHours(),
       date: dates
     }
 
@@ -42,30 +43,28 @@ export async function calculateMetaData() {
 }
 
 export async function getLaborHours(): Promise<number> {
-  try {
-    const token = core.getInput('token', { required: true });
-    const octokit = github.getOctokit(token);
-    const { owner, repo } = github.context.repo;
+  let output = '';
 
-    const [repoData, languages] = await Promise.all([
-      octokit.rest.repos.get({ owner, repo }),
-      octokit.rest.repos.listLanguages({ owner, repo })
-    ]);
+  const exclude = [
+    'md',
+    'json', 
+    'yml',
+    'txt',
+    'lock',
+    'xml'
+  ];
 
-    const totalLines = Object.values(languages.data).reduce((sum, lines) => sum + lines, 0);
+  const excludeArgs = exclude.map(pattern => `--exclude-ext=${pattern}`).join(' ');
 
-    const c = 2.5;    
-    const d = 0.38;   
-    const a = 2.4;    
-    const b = 1.05;   
+  await exec(`npx cloc . --json ${excludeArgs}`, [], {
+    listeners: {
+      stdout: (data: Buffer) => {
+        output += data.toString();
+      }
+    }
+  });
 
-    const effort = a * Math.pow(totalLines / 1000, b);
-    const scheduleMonths = c * Math.pow(effort, d);
-    
-    return Number((scheduleMonths * 730.001).toFixed(2));
-
-  } catch (error) {
-    core.error('Error calculating labor hours: ' + error);
-    return 0;
-  }
+  const clocData = JSON.parse(output);
+  const scheduleMonths = Math.sqrt(clocData.SUM?.code / 750);
+  return scheduleMonths * 730.001;
 }

@@ -1,6 +1,6 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
+name: code.json Auto Generator
+description: 'Manages code.json files in repositories, ensuring schema consistency and auto-calculation of certain fields'
+author: DSACMS
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
@@ -9,16 +9,10 @@ branding:
 
 # Define your inputs here.
 inputs:
-  token:
-    description: Your input description here
+  github-token:
+    description: 'GitHub token for API access'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: Your output description here
-
+    default: ${{ github.token }}
 runs:
   using: node20
   main: dist/index.js
