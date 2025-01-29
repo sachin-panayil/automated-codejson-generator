@@ -38,7 +38,9 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "cloc": "^2.2.0-cloc"
+    "@octokit/action": "^7.0.0",
+    "cloc": "^2.2.0-cloc",
+    "octokit-plugin-create-pull-request": "^6.0.0"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",

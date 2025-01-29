@@ -6,3 +6,4 @@ export declare function calculateMetaData(): Promise<{
 } | null>;
 export declare function getDateFields(): Promise<CodeDate>;
 export declare function getLaborHours(): Promise<number>;
+export declare function sendPR(content: string): Promise<void>;
