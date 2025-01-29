@@ -31224,7 +31224,7 @@ var githubExports = requireGithub();
 
 async function getLaborHours() {
     try {
-        const token = coreExports.getInput('github-token', { required: true });
+        const token = coreExports.getInput('token', { required: true });
         const octokit = githubExports.getOctokit(token);
         const { owner, repo } = githubExports.context.repo;
         const [repoData, languages] = await Promise.all([
