@@ -22,6 +22,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Install scc
+        run: |
+          sudo snap install scc
       
       - name: Update code.json
         uses: ./ 
