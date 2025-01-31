@@ -52,7 +52,7 @@ async function getMetaData(): Promise<Partial<CodeJSON>> {
   const partialCodeJSON = await helpers.calculateMetaData()
 
   return {
-    laborHours: partialCodeJSON?.laborHours,
+    // laborHours: partialCodeJSON?.laborHours,
     date: {
       created: partialCodeJSON?.date.created ?? "", // need better default values here
       lastModified: partialCodeJSON?.date.lastModified ?? "",
@@ -62,44 +62,8 @@ async function getMetaData(): Promise<Partial<CodeJSON>> {
 }
 
 export async function run(): Promise<void> {
-  try {
-    const workspaceDir = process.env.GITHUB_WORKSPACE;
-    if (!workspaceDir) {
-      throw new Error('GITHUB_WORKSPACE not set');
-    }
-
-    const repoCodePath = path.join(workspaceDir, 'code.json');
-    const existing = helpers.readJSON(repoCodePath);
-    const autoFields = await getMetaData();
-    
-    let finalJson: CodeJSON;
-    
-    if (!existing) {
-      finalJson = {
-        ...baselineCodeJSON,
-        ...autoFields
-      };
-      core.info('No existing code.json found. Creating new file with baseline schema.');
-    } else {
-      finalJson = {
-        ...baselineCodeJSON,
-        ...existing,
-        ...autoFields
-      };
-      core.info('Updated existing code.json with auto-calculated fields.');
-      
-      helpers.sendPR(JSON.stringify(finalJson))
-    }
-    
-    core.info(`Successfully updated code.json at ${repoCodePath}`);
-    
-  } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(error.message);
-    } else {
-      core.setFailed('An unexpected error occurred');
-    }
-  }
+  const test = helpers.getLaborHours()
+  console.log(test)
 }
 
 

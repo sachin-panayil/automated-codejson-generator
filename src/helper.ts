@@ -1,30 +1,12 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { createPullRequest } from "octokit-plugin-create-pull-request"
-import { exec } from '@actions/exec'
+import { spawn } from 'child_process'
+
 import * as fs from 'fs'
-import { Octokit } from '@octokit/core'
 
 import { CodeJSON, Date as CodeDate } from './model.js'
 
 const token = core.getInput("github-token", { required: true })
-
-const MyOctokit = Octokit.plugin(createPullRequest)
-const octokit = new MyOctokit({
-  auth: token
-})
-
-const githubKit = github.getOctokit(token)
-
-export function readJSON(filepath: string): CodeJSON | null {
-  try {
-    const fileContent = fs.readFileSync(filepath, 'utf8')
-    return JSON.parse(fileContent) as CodeJSON
-  } catch (error) {
-    console.log(`Error with reading JSON file: ${error}`)
-    return null
-  }
-}
 
 export async function calculateMetaData() {
   try {
@@ -43,12 +25,11 @@ export async function calculateMetaData() {
 }
 
 export async function getDateFields(): Promise<CodeDate> {
+  const octokit = github.getOctokit(token)
   const { owner, repo } = github.context.repo
 
   try {
-    const [repoData] = await Promise.all([
-      githubKit.rest.repos.get({ owner, repo }),
-    ]);
+    const repoData = await octokit.rest.repos.get({owner, repo});
 
     const dates: CodeDate = {
       created: repoData.data.created_at,         
@@ -67,62 +48,40 @@ export async function getDateFields(): Promise<CodeDate> {
   }
 }
 
-export async function getLaborHours(): Promise<number> {
-  let output = '';
+export async function getLaborHours() {
+  let cmd = 'scc .. --format json2 --exclude-file '
 
-  const exclude = [
-    'md',
-    'json', 
-    'yml',
-    'txt',
-    'lock',
-    'xml'
-  ];
+  const files_to_exclude = "checks.yml, auto-changelog.yml, contributors.yml, repoStructure.yml, code.json, checklist.md, checklist.pdf, README.md, CONTIRBUTING.md, LICENSE, MAINTAINERS.md, repolinter.json, SECURITY.md, CODE_OF_CONDUCT.md, CODEOWNERS.md, COMMUNITY_GUIDELINES.md, GOVERANCE.md"
 
-  const excludeArgs = exclude.map(pattern => `--exclude-ext=${pattern}`).join(' ');
+  let output = ""
 
-  await exec(`npx cloc . --json ${excludeArgs}`, [], {
-    listeners: {
-      stdout: (data: Buffer) => {
-        output += data.toString();
-      }
-    }
+  const child = spawn(cmd)
+
+  child.stdout.on('data', (data) => {
+    output += data.toString();
   });
 
-  const clocData = JSON.parse(output);
-  const scheduleMonths = Math.sqrt(clocData.SUM?.code / 750);
-  return scheduleMonths * 730.001;
+  child.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`);
+  });
+
+  const exitCode = await new Promise<number>((resolve) => {
+    child.on('close', resolve);
+  });
+
+  if (exitCode !== 0) {
+    throw new Error(`Process exited with code ${exitCode}`);
+  }
+
+  return output;
 }
 
-export async function sendPR(content: string) {
-  const { owner, repo } = github.context.repo
-  const runNumber = getRunNumber()
-
-  const pr = await octokit.createPullRequest({
-    owner,
-    repo,
-    title: `Repolinter Results`,
-    body: "this is a test",
-    base: "main",
-    head: `repolinter-results-#${runNumber}`,
-    changes: [{
-      files: {
-        "code.json": content
-      },
-      commit: `changes based on repolinter output`
-    }]
-  })
-
-  if (pr) {
-    core.info(`Created PR: ${pr.data.html_url}`)
-  }  
-}
-
-function getRunNumber(): number {
-  const runNum = parseInt(process.env['GITHUB_RUN_NUMBER'] as string)
-  if (!runNum || isNaN(runNum))
-    throw new Error(
-      `Found invalid GITHUB_RUN_NUMBER "${process.env['GITHUB_RUN_NUMBER']}"`
-    )
-  return runNum
+export function readJSON(filepath: string): CodeJSON | null {
+  try {
+    const fileContent = fs.readFileSync(filepath, 'utf8')
+    return JSON.parse(fileContent) as CodeJSON
+  } catch (error) {
+    console.log(`Error with reading JSON file: ${error}`)
+    return null
+  }
 }
