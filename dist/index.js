@@ -31261,8 +31261,9 @@ async function getDateFields() {
 }
 async function getLaborHours() {
     try {
-        const filesToExclude = "checks.yml,auto-changelog.yml,contributors.yml,repoStructure.yml,code.json,checklist.md,checklist.pdf,README.md,CONTIRBUTING.md,LICENSE,MAINTAINERS.md,repolinter.json,SECURITY.md,CODE_OF_CONDUCT.md,CODEOWNERS.md,COMMUNITY_GUIDELINES.md,GOVERANCE.md";
-        const { stdout } = await execAsync(`scc .. -f json2 --exclude-file ${filesToExclude}`);
+        // const filesToExclude = "checks.yml,auto-changelog.yml,contributors.yml,repoStructure.yml,code.json,checklist.md,checklist.pdf,README.md,CONTIRBUTING.md,LICENSE,MAINTAINERS.md,repolinter.json,SECURITY.md,CODE_OF_CONDUCT.md,CODEOWNERS.md,COMMUNITY_GUIDELINES.md,GOVERANCE.md"
+        // add this in later
+        const { stdout } = await execAsync(`scc .. -f json2`);
         const json = JSON.parse(stdout);
         const laborHours = Math.ceil(json["estimatedScheduleMonths"] * 730.001);
         return laborHours;
