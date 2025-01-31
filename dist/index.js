@@ -8,7 +8,7 @@ import require$$0$5 from 'net';
 import require$$1$1 from 'tls';
 import require$$4$1 from 'events';
 import require$$0$3 from 'assert';
-import require$$0$2 from 'util';
+import require$$0$2, { promisify } from 'util';
 import require$$0$4 from 'stream';
 import require$$7 from 'buffer';
 import require$$8 from 'querystring';
@@ -25,7 +25,7 @@ import require$$1$4 from 'url';
 import require$$3$2 from 'zlib';
 import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
-import require$$2$3, { spawn } from 'child_process';
+import require$$2$3, { exec as exec$1 } from 'child_process';
 import require$$6$1 from 'timers';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -31220,30 +31220,71 @@ function requireGithub () {
 	return github;
 }
 
-requireGithub();
+var githubExports = requireGithub();
 
-coreExports.getInput("github-token", { required: true });
-async function getLaborHours() {
-    let cmd = 'scc .. --format json2 --exclude-file ';
-    let output = "";
-    const child = spawn(cmd);
-    child.stdout.on('data', (data) => {
-        output += data.toString();
-    });
-    child.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-    });
-    const exitCode = await new Promise((resolve) => {
-        child.on('close', resolve);
-    });
-    if (exitCode !== 0) {
-        throw new Error(`Process exited with code ${exitCode}`);
+const token = coreExports.getInput("github-token", { required: true });
+const execAsync = promisify(exec$1);
+async function calculateMetaData() {
+    try {
+        const laborHours = await getLaborHours();
+        const dateFeilds = await getDateFields();
+        return {
+            laborHours: laborHours,
+            date: dateFeilds
+        };
     }
-    return output;
+    catch (error) {
+        console.log(`Error with calculating meta data: ${error}`);
+        return null;
+    }
+}
+async function getDateFields() {
+    const octokit = githubExports.getOctokit(token);
+    const { owner, repo } = githubExports.context.repo;
+    try {
+        const repoData = await octokit.rest.repos.get({ owner, repo });
+        const dates = {
+            created: repoData.data.created_at,
+            lastModified: repoData.data.updated_at,
+            metaDataLastUpdated: new Date().toISOString()
+        };
+        return dates;
+    }
+    catch (error) {
+        console.log(`Error getting date: ${error}`);
+        return {
+            created: "",
+            lastModified: "",
+            metaDataLastUpdated: ""
+        };
+    }
+}
+async function getLaborHours() {
+    try {
+        const filesToExclude = "checks.yml,auto-changelog.yml,contributors.yml,repoStructure.yml,code.json,checklist.md,checklist.pdf,README.md,CONTIRBUTING.md,LICENSE,MAINTAINERS.md,repolinter.json,SECURITY.md,CODE_OF_CONDUCT.md,CODEOWNERS.md,COMMUNITY_GUIDELINES.md,GOVERANCE.md";
+        const { stdout } = await execAsync(`scc .. -f json2 --exclude-file ${filesToExclude}`);
+        const json = JSON.parse(stdout);
+        const laborHours = Math.ceil(json["estimatedScheduleMonths"] * 730.001);
+        return laborHours;
+    }
+    catch (error) {
+        throw new Error(`Failed to run SCC: ${error}`);
+    }
 }
 
+async function getMetaData() {
+    const partialCodeJSON = await calculateMetaData();
+    return {
+        laborHours: partialCodeJSON?.laborHours,
+        date: {
+            created: partialCodeJSON?.date.created ?? "", // need better default values here
+            lastModified: partialCodeJSON?.date.lastModified ?? "",
+            metaDataLastUpdated: partialCodeJSON?.date.metaDataLastUpdated ?? ""
+        }
+    };
+}
 async function run() {
-    const test = getLaborHours();
+    const test = await getMetaData();
     console.log(test);
 }
 

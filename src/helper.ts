@@ -1,12 +1,14 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { spawn } from 'child_process'
+import { exec } from 'child_process'
+import { promisify } from 'util';
 
 import * as fs from 'fs'
 
 import { CodeJSON, Date as CodeDate } from './model.js'
 
 const token = core.getInput("github-token", { required: true })
+const execAsync = promisify(exec);
 
 export async function calculateMetaData() {
   try {
@@ -48,32 +50,18 @@ export async function getDateFields(): Promise<CodeDate> {
   }
 }
 
-export async function getLaborHours() {
-  let cmd = 'scc .. --format json2 --exclude-file '
+export async function getLaborHours(): Promise<number> {
+  try {
+    const filesToExclude = "checks.yml,auto-changelog.yml,contributors.yml,repoStructure.yml,code.json,checklist.md,checklist.pdf,README.md,CONTIRBUTING.md,LICENSE,MAINTAINERS.md,repolinter.json,SECURITY.md,CODE_OF_CONDUCT.md,CODEOWNERS.md,COMMUNITY_GUIDELINES.md,GOVERANCE.md"
 
-  const files_to_exclude = "checks.yml, auto-changelog.yml, contributors.yml, repoStructure.yml, code.json, checklist.md, checklist.pdf, README.md, CONTIRBUTING.md, LICENSE, MAINTAINERS.md, repolinter.json, SECURITY.md, CODE_OF_CONDUCT.md, CODEOWNERS.md, COMMUNITY_GUIDELINES.md, GOVERANCE.md"
+    const { stdout } = await execAsync(`scc .. -f json2 --exclude-file ${filesToExclude}`);
+    const json = JSON.parse(stdout);
 
-  let output = ""
-
-  const child = spawn(cmd)
-
-  child.stdout.on('data', (data) => {
-    output += data.toString();
-  });
-
-  child.stderr.on('data', (data) => {
-    console.error(`stderr: ${data}`);
-  });
-
-  const exitCode = await new Promise<number>((resolve) => {
-    child.on('close', resolve);
-  });
-
-  if (exitCode !== 0) {
-    throw new Error(`Process exited with code ${exitCode}`);
+    const laborHours = Math.ceil(json["estimatedScheduleMonths"] * 730.001)
+    return laborHours
+  } catch (error) {
+    throw new Error(`Failed to run SCC: ${error}`);
   }
-
-  return output;
 }
 
 export function readJSON(filepath: string): CodeJSON | null {
