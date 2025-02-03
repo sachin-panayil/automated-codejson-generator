@@ -31261,15 +31261,32 @@ async function getDateFields() {
 }
 async function getLaborHours() {
     try {
-        // const filesToExclude = "checks.yml,auto-changelog.yml,contributors.yml,repoStructure.yml,code.json,checklist.md,checklist.pdf,README.md,CONTIRBUTING.md,LICENSE,MAINTAINERS.md,repolinter.json,SECURITY.md,CODE_OF_CONDUCT.md,CODEOWNERS.md,COMMUNITY_GUIDELINES.md,GOVERANCE.md"
-        // add this in later
-        const { stdout } = await execAsync(`scc .. -f json2 2>/dev/null`);
-        const json = JSON.parse(stdout);
-        const laborHours = Math.ceil(json["estimatedScheduleMonths"] * 730.001);
+        // Run SCC with explicit JSON formatting and error handling
+        const { stdout, stderr } = await execAsync(`scc .. --format json2`);
+        // Check if we got any error output
+        if (stderr) {
+            console.error('SCC stderr:', stderr);
+        }
+        // Try to extract valid JSON from the output
+        let json;
+        try {
+            json = JSON.parse(stdout.trim());
+        }
+        catch (parseError) {
+            console.error('Raw stdout:', stdout);
+            throw new Error(`Failed to parse SCC output as JSON: ${parseError}`);
+        }
+        // Validate that we have the expected data
+        if (!json.hasOwnProperty('estimatedScheduleMonths')) {
+            throw new Error('SCC output missing estimatedScheduleMonths property');
+        }
+        // Calculate labor hours (one month ≈ 730.001 hours)
+        const laborHours = Math.ceil(json.estimatedScheduleMonths * 730.001);
         return laborHours;
     }
     catch (error) {
-        throw new Error(`Failed to run SCC: ${error}`);
+        // Provide more context in the error message
+        throw new Error(`Failed to calculate labor hours: ${error}`);
     }
 }
 
