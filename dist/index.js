@@ -31223,13 +31223,13 @@ function requireGithub () {
 var githubExports = requireGithub();
 
 const token = coreExports.getInput("github-token", { required: true });
-const execAsync = promisify(exec$1);
+promisify(exec$1);
 async function calculateMetaData() {
     try {
-        const laborHours = await getLaborHours();
+        // const laborHours = await getLaborHours()
         const dateFeilds = await getDateFields();
         return {
-            laborHours: laborHours,
+            // laborHours: laborHours,
             date: dateFeilds
         };
     }
@@ -31259,41 +31259,11 @@ async function getDateFields() {
         };
     }
 }
-async function getLaborHours() {
-    try {
-        // Run SCC with explicit JSON formatting and error handling
-        const { stdout, stderr } = await execAsync(`scc .. --format json2`);
-        // Check if we got any error output
-        if (stderr) {
-            console.error('SCC stderr:', stderr);
-        }
-        // Try to extract valid JSON from the output
-        let json;
-        try {
-            json = JSON.parse(stdout.trim());
-        }
-        catch (parseError) {
-            console.error('Raw stdout:', stdout);
-            throw new Error(`Failed to parse SCC output as JSON: ${parseError}`);
-        }
-        // Validate that we have the expected data
-        if (!json.hasOwnProperty('estimatedScheduleMonths')) {
-            throw new Error('SCC output missing estimatedScheduleMonths property');
-        }
-        // Calculate labor hours (one month ≈ 730.001 hours)
-        const laborHours = Math.ceil(json.estimatedScheduleMonths * 730.001);
-        return laborHours;
-    }
-    catch (error) {
-        // Provide more context in the error message
-        throw new Error(`Failed to calculate labor hours: ${error}`);
-    }
-}
 
 async function getMetaData() {
     const partialCodeJSON = await calculateMetaData();
     return {
-        laborHours: partialCodeJSON?.laborHours,
+        // laborHours: partialCodeJSON?.laborHours,
         date: {
             created: partialCodeJSON?.date.created ?? "", // need better default values here
             lastModified: partialCodeJSON?.date.lastModified ?? "",
