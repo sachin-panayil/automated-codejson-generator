@@ -58217,6 +58217,19 @@ function createPullRequest(octokit) {
 createPullRequest.VERSION = VERSION;
 
 promisify(exec$1);
+const TOKEN = coreExports.getInput("GITHUB_TOKEN", { required: true });
+const MyOctoKit = Octokit.plugin(createPullRequest);
+const octokit = new MyOctoKit({
+    auth: TOKEN,
+    log: {
+        debug: coreExports.debug,
+        info: coreExports.info,
+        warn: coreExports.warning,
+        error: coreExports.error
+    }
+});
+const owner = process.env.GITHUB_REPOSITORY_OWNER ?? "";
+const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? "";
 //===============================================
 // Meta Data
 //===============================================
@@ -58236,13 +58249,6 @@ async function calculateMetaData() {
 }
 async function getDateFields() {
     try {
-        const TOKEN = coreExports.getInput("github-token", { required: true });
-        const MyOctoKit = Octokit.plugin(createPullRequest);
-        const octokit = new MyOctoKit({
-            auth: TOKEN,
-        });
-        const owner = process.env.GITHUB_REPOSITORY_OWNER;
-        const repo = process.env.GITHUB_REPOSITORY?.split('/')[1];
         if (!owner || !repo) {
             throw new Error('Unable to determine repository owner or name from environment');
         }
@@ -58264,7 +58270,7 @@ async function getDateFields() {
     }
 }
 //===============================================
-// JSON
+// Data Handling
 //===============================================
 async function readJSON(filepath) {
     try {
@@ -58276,9 +58282,34 @@ async function readJSON(filepath) {
         return null;
     }
 }
-async function writeJSON(filename, data) {
-    const jsonString = JSON.stringify(data, null, 2);
-    await fs.writeFile(filename, jsonString);
+async function sendPR(updatedCodeJSON) {
+    try {
+        const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
+        const branchName = `code-json-${new Date().getTime()}`;
+        const PR = await octokit.createPullRequest({
+            owner,
+            repo,
+            title: 'Update code.json',
+            body: 'This PR updates the code.json file',
+            base: 'main',
+            head: branchName,
+            changes: [{
+                    files: {
+                        'code.json': formattedContent
+                    },
+                    commit: 'Update code.json metadata'
+                }]
+        });
+        if (PR) {
+            coreExports.info(`Successfully created PR: ${PR.data.html_url}`);
+        }
+        else {
+            coreExports.error(`Failed to create PR because of PR object`);
+        }
+    }
+    catch (error) {
+        coreExports.error(`Failed to create PR: ${error}`);
+    }
 }
 
 const baselineCodeJSON = {
@@ -58351,8 +58382,7 @@ async function run() {
             ...metaData
         };
     }
-    writeJSON("./code.json", finalCodeJSON);
-    console.log(finalCodeJSON);
+    sendPR(finalCodeJSON);
 }
 
 /**

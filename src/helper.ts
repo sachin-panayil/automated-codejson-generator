@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs/promises';
 
-import { Octokit as ActionKit } from '@octokit/action'
+import { Octokit as ActionKit, Octokit } from '@octokit/action'
 import { createPullRequest } from "octokit-plugin-create-pull-request"
 import { exec } from 'child_process'
 import { promisify } from 'util';
@@ -10,6 +10,21 @@ import { promisify } from 'util';
 import { CodeJSON, Date as CodeDate } from './model.js'
 
 const execAsync = promisify(exec);
+
+const TOKEN = core.getInput("GITHUB_TOKEN", { required: true })
+const MyOctoKit = ActionKit.plugin(createPullRequest)
+const octokit = new MyOctoKit({
+  auth: TOKEN,
+  log: {
+    debug: core.debug,
+    info: core.info,
+    warn: core.warning,
+    error: core.error
+  }
+});
+
+const owner = process.env.GITHUB_REPOSITORY_OWNER ?? ""
+const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? ""
 
 //===============================================
 // Meta Data
@@ -30,17 +45,8 @@ export async function calculateMetaData() {
   }
 }
 
-export async function getDateFields(): Promise<CodeDate> {
+async function getDateFields(): Promise<CodeDate> {
   try {
-    const TOKEN = core.getInput("github-token", { required: true })
-    const MyOctoKit = ActionKit.plugin(createPullRequest)
-    const octokit = new MyOctoKit({
-      auth: TOKEN,
-    });
-
-    const owner = process.env.GITHUB_REPOSITORY_OWNER
-    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1]
-
     if (!owner || !repo) {
       throw new Error('Unable to determine repository owner or name from environment');
     }
@@ -64,7 +70,7 @@ export async function getDateFields(): Promise<CodeDate> {
   }
 }
 
-export async function getLaborHours(): Promise<number> {
+async function getLaborHours(): Promise<number> {
   try {
     // const filesToExclude = "checks.yml,auto-changelog.yml,contributors.yml,repoStructure.yml,code.json,checklist.md,checklist.pdf,README.md,CONTIRBUTING.md,LICENSE,MAINTAINERS.md,repolinter.json,SECURITY.md,CODE_OF_CONDUCT.md,CODEOWNERS.md,COMMUNITY_GUIDELINES.md,GOVERANCE.md"
     // add this in later
@@ -77,10 +83,10 @@ export async function getLaborHours(): Promise<number> {
   } catch (error) {
     throw new Error(`Failed to run SCC: ${error}`);
   }
-}
+} 
 
 //===============================================
-// JSON
+// Data Handling
 //===============================================
 export async function readJSON(filepath: string): Promise<CodeJSON | null> {
   try {
@@ -92,14 +98,33 @@ export async function readJSON(filepath: string): Promise<CodeJSON | null> {
   }
 }
 
-export async function writeJSON(filename: string, data: CodeJSON): Promise<void> {
-  const jsonString = JSON.stringify(data, null, 2);
-  await fs.writeFile(filename, jsonString);
-} 
+export async function sendPR(updatedCodeJSON: CodeJSON) {
+   try {
+    const formattedContent = JSON.stringify(updatedCodeJSON, null, 2)
+    const branchName = `code-json-${new Date().getTime()}`
 
-//===============================================
-// PR
-//===============================================
-export function sendPR() {
+    const PR = await octokit.createPullRequest({
+      owner,
+      repo,
+      title: 'Update code.json',
+      body: 'This PR updates the code.json file',
+      base: 'main',
+      head: branchName,
+      changes: [{
+        files: {
+          'code.json': formattedContent
+        },
+        commit: 'Update code.json metadata'
+      }]
+    });  
 
+    if (PR) {
+      core.info(`Successfully created PR: ${PR.data.html_url}`)
+    } else {
+      core.error(`Failed to create PR because of PR object`)
+    }
+
+  } catch (error) {
+    core.error(`Failed to create PR: ${error}`)
+  }
 }

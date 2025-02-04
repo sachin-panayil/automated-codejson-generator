@@ -9,7 +9,7 @@ branding:
 
 # Define your inputs here.
 inputs:
-  github-token:
+  GITHUB_TOKEN:
     description: 'GitHub token for API access'
     required: true
     default: ${{ github.token }}

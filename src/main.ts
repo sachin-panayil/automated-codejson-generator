@@ -79,8 +79,7 @@ export async function run(): Promise<void> {
     }
   }
 
-  helpers.writeJSON("./code.json", finalCodeJSON)
-  console.log(finalCodeJSON)
+  helpers.sendPR(finalCodeJSON)
   
 }
 
