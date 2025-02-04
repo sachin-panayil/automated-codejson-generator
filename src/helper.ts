@@ -73,7 +73,7 @@ async function getDateFields(): Promise<CodeDate> {
 async function getLaborHours(): Promise<number> {
   try {
     // Run scc with json2 format which gives us detailed metrics
-    const { stdout } = await execAsync('scc . --format json2');
+    const { stdout } = await execAsync('scc . --format json');
     
     // Parse the JSON output
     const json = JSON.parse(stdout);
