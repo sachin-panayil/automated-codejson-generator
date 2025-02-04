@@ -48,7 +48,7 @@ async function getMetaData(): Promise<Partial<CodeJSON>> {
   const partialCodeJSON = await helpers.calculateMetaData()
 
   return {
-    // laborHours: partialCodeJSON?.laborHours,
+    laborHours: partialCodeJSON?.laborHours,
     date: {
       created: partialCodeJSON?.date.created ?? "", // need better default values here
       lastModified: partialCodeJSON?.date.lastModified ?? "",

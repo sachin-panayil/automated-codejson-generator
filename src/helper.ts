@@ -72,27 +72,16 @@ async function getDateFields(): Promise<CodeDate> {
 
 async function getLaborHours(): Promise<number> {
   try {
-    const { stdout } = await execAsync(`scc .`);
-    core.info(stdout)
-    
-    const scheduleMatch = stdout.match(/Estimated Schedule Effort \(organic\) ([\d.]+) months/);
-    
-    if (!scheduleMatch) {
-        throw new Error('Could not find schedule effort in output');
-    }
-    
-    const estimatedMonths = parseFloat(scheduleMatch[1]);
-    core.info(estimatedMonths.toString())
+    const { stdout } = await execAsync(`scc . --format json2`)
+    const sccData = JSON.parse(stdout)
 
-    const laborHours = Math.ceil(estimatedMonths * 730.001);
-    core.info(laborHours.toString())
-
-    return laborHours;
-} catch (error) {
-    console.error('Raw command output:', error);
-    throw new Error(`Failed to run SCC: ${error}`);
+    const laborHours = Math.ceil(sccData["estimatedScheduleMonths"] * 730.001)
+    return laborHours
+  } catch (error) {
+    console.error('Raw command output:', error)
+    throw new Error(`Failed to run SCC: ${error}`)
+  }
 }
-} 
 
 //===============================================
 // Data Handling
