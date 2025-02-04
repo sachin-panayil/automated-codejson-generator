@@ -1,10 +1,45 @@
 {
-  "projectType": "Website",
+  "name": "",
+  "description": "",
+  "longDescription": "",
+  "status": "",
+  "permissions": {
+    "license": [
+      {
+        "name": "",
+        "URL": ""
+      }
+    ],
+    "usageType": "",
+    "exemptionText": ""
+  },
+  "organization": "",
+  "repositoryURL": "",
+  "vcs": "git",
+  "laborHours": 0,
+  "platforms": [],
+  "categories": [],
+  "softwareType": "",
+  "languages": [],
+  "maintenance": "",
+  "date": {
+    "created": "2025-01-24T21:04:38Z",
+    "lastModified": "2025-02-04T20:46:47Z",
+    "metaDataLastUpdated": "2025-02-04T20:47:00.683Z"
+  },
+  "tags": [],
+  "contact": {
+    "email": "",
+    "name": ""
+  },
+  "localisation": false,
+  "repositoryType": "",
   "userInput": "No",
   "fismaLevel": "Low",
   "group": "CMS/OA/DSAC",
   "subsetInHealthcare": "Operational",
   "userType": "Government",
   "repositoryHost": "Github.com",
-  "maturityModelTier": "3"
+  "maturityModelTier": "3",
+  "projectType": "Website"
 }
