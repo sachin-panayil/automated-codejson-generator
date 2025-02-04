@@ -96,11 +96,12 @@ async function getLaborHours(): Promise<number> {
 
   try {
     const { stdout } = await execAsync(`scc . --format json2 2>/dev/null`);
-    const sccData = JSON.parse(stdout) as SCCOutput;
-
     console.log(stdout)
     console.log("---------------------------------")
+    const sccData = JSON.parse(stdout) as SCCOutput;
     console.log(sccData)
+    console.log("---------------------------------")
+
   
     const laborHours = Math.ceil(sccData.estimatedScheduleMonths * 730.001);
     return laborHours;

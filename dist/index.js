@@ -58272,10 +58272,11 @@ async function getDateFields() {
 async function getLaborHours() {
     try {
         const { stdout } = await execAsync(`scc . --format json2 2>/dev/null`);
-        const sccData = JSON.parse(stdout);
         console.log(stdout);
         console.log("---------------------------------");
+        const sccData = JSON.parse(stdout);
         console.log(sccData);
+        console.log("---------------------------------");
         const laborHours = Math.ceil(sccData.estimatedScheduleMonths * 730.001);
         return laborHours;
     }
