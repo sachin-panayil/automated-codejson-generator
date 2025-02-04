@@ -72,18 +72,35 @@ async function getDateFields(): Promise<CodeDate> {
 
 async function getLaborHours(): Promise<number> {
   try {
-    // const filesToExclude = "checks.yml,auto-changelog.yml,contributors.yml,repoStructure.yml,code.json,checklist.md,checklist.pdf,README.md,CONTIRBUTING.md,LICENSE,MAINTAINERS.md,repolinter.json,SECURITY.md,CODE_OF_CONDUCT.md,CODEOWNERS.md,COMMUNITY_GUIDELINES.md,GOVERANCE.md"
-    // add this in later
-
-    const { stdout } = await execAsync(`scc .. --format json2`)
+    // Run scc with json2 format which gives us detailed metrics
+    const { stdout } = await execAsync('scc . --format json2');
+    
+    // Parse the JSON output
     const json = JSON.parse(stdout);
+    
+    // Calculate total lines of code and complexity
+    let totalLines = 0;
+    let totalComplexity = 0;
 
-    const laborHours = Math.ceil(json["estimatedScheduleMonths"] * 730.001)
-    return laborHours
+    // json2 format returns an array of language statistics
+    for (const lang of json) {
+      totalLines += lang.Lines || 0;
+      totalComplexity += lang.Complexity || 0;
+    }
+
+    // Estimate schedule months using similar formula to scc internal calculation
+    // This is a simplified version of COCOMO model
+    const estimatedScheduleMonths = Math.pow(totalLines / 1000, 0.33);
+    
+    // Convert to labor hours (1 month = 730.001 hours as used in the original code)
+    const laborHours = Math.ceil(estimatedScheduleMonths * 730.001);
+    
+    return Math.max(1, laborHours); // Ensure we return at least 1 hour
   } catch (error) {
+    console.error('Full error:', error);
     throw new Error(`Failed to run SCC: ${error}`);
   }
-} 
+}
 
 //===============================================
 // Data Handling
