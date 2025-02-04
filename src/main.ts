@@ -62,8 +62,25 @@ async function getMetaData(): Promise<Partial<CodeJSON>> {
 }
 
 export async function run(): Promise<void> {
-  const test = await getMetaData()
-  console.log(test)
+  const metaData = await getMetaData()
+  const currentCodeJSON = await helpers.readJSON("./code.json")
+  let finalCodeJSON = {} as CodeJSON
+
+  if (currentCodeJSON) {
+    finalCodeJSON = {
+      ...baselineCodeJSON,
+      ...currentCodeJSON,
+      ...metaData
+    }
+  } else {
+    finalCodeJSON = {
+      ...baselineCodeJSON,
+      ...metaData
+    }
+  }
+
+  helpers.writeJSON("./code.json", finalCodeJSON)
+  
 }
 
 

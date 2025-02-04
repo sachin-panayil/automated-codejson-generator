@@ -1,15 +1,19 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import * as fs from 'fs/promises';
+
+import { Octokit as ActionKit } from '@octokit/action'
+import { createPullRequest } from "octokit-plugin-create-pull-request"
 import { exec } from 'child_process'
 import { promisify } from 'util';
 
-import * as fs from 'fs'
-
 import { CodeJSON, Date as CodeDate } from './model.js'
 
-const token = core.getInput("github-token", { required: true })
 const execAsync = promisify(exec);
 
+//===============================================
+// Meta Data
+//===============================================
 export async function calculateMetaData() {
   try {
     // const laborHours = await getLaborHours()
@@ -27,11 +31,21 @@ export async function calculateMetaData() {
 }
 
 export async function getDateFields(): Promise<CodeDate> {
-  const octokit = github.getOctokit(token)
-  const { owner, repo } = github.context.repo
-
   try {
-    const repoData = await octokit.rest.repos.get({owner, repo});
+    const TOKEN = core.getInput("github-token", { required: true })
+    const MyOctoKit = ActionKit.plugin(createPullRequest)
+    const octokit = new MyOctoKit({
+      auth: TOKEN,
+    });
+
+    const owner = process.env.GITHUB_REPOSITORY_OWNER
+    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1]
+
+    if (!owner || !repo) {
+      throw new Error('Unable to determine repository owner or name from environment');
+    }
+
+    const repoData = await octokit.rest.repos.get({owner,repo})
 
     const dates: CodeDate = {
       created: repoData.data.created_at,         
@@ -65,12 +79,27 @@ export async function getLaborHours(): Promise<number> {
   }
 }
 
-export function readJSON(filepath: string): CodeJSON | null {
+//===============================================
+// JSON
+//===============================================
+export async function readJSON(filepath: string): Promise<CodeJSON | null> {
   try {
-    const fileContent = fs.readFileSync(filepath, 'utf8')
+    const fileContent = await fs.readFile(filepath, 'utf8')
     return JSON.parse(fileContent) as CodeJSON
   } catch (error) {
     console.log(`Error with reading JSON file: ${error}`)
     return null
   }
+}
+
+export async function writeJSON(filename: string, data: CodeJSON): Promise<void> {
+  const jsonString = JSON.stringify(data, null, 2);
+  await fs.writeFile(filename, jsonString);
+} 
+
+//===============================================
+// PR
+//===============================================
+export function sendPR() {
+
 }
