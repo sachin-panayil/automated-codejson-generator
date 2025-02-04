@@ -71,36 +71,40 @@ async function getDateFields(): Promise<CodeDate> {
 }
 
 async function getLaborHours(): Promise<number> {
+  interface LanguageSummary {
+    Name: string;
+    Bytes: number;
+    CodeBytes: number;
+    Lines: number;
+    Code: number;
+    Comment: number;
+    Blank: number;
+    Complexity: number;
+    Count: number;
+    WeightedComplexity: number;
+    Files: string[];
+    LineLength: null | number;
+    ULOC: number;
+  }
+  
+  interface SCCOutput {
+    languageSummary: LanguageSummary[];
+    estimatedCost: number;
+    estimatedScheduleMonths: number;
+    estimatedPeople: number;
+  }
+
   try {
-    // Run scc with json2 format which gives us detailed metrics
-    const { stdout } = await execAsync('scc . --format json');
-    
-    // Parse the JSON output
-    const json = JSON.parse(stdout);
-    
-    // Calculate total lines of code and complexity
-    let totalLines = 0;
-    let totalComplexity = 0;
-
-    // json2 format returns an array of language statistics
-    for (const lang of json) {
-      totalLines += lang.Lines || 0;
-      totalComplexity += lang.Complexity || 0;
-    }
-
-    // Estimate schedule months using similar formula to scc internal calculation
-    // This is a simplified version of COCOMO model
-    const estimatedScheduleMonths = Math.pow(totalLines / 1000, 0.33);
-    
-    // Convert to labor hours (1 month = 730.001 hours as used in the original code)
-    const laborHours = Math.ceil(estimatedScheduleMonths * 730.001);
-    
-    return Math.max(1, laborHours); // Ensure we return at least 1 hour
+    const { stdout } = await execAsync(`scc . --format json2 2>/dev/null`);
+    const sccData = JSON.parse(stdout) as SCCOutput;
+  
+    const laborHours = Math.ceil(sccData.estimatedScheduleMonths * 730.001);
+    return laborHours;
   } catch (error) {
-    console.error('Full error:', error);
+    console.error('Raw command output:', error);
     throw new Error(`Failed to run SCC: ${error}`);
   }
-}
+} 
 
 //===============================================
 // Data Handling
