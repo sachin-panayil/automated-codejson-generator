@@ -58352,6 +58352,7 @@ async function run() {
         };
     }
     writeJSON("./code.json", finalCodeJSON);
+    console.log(finalCodeJSON);
 }
 
 /**
