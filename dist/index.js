@@ -58216,7 +58216,7 @@ function createPullRequest(octokit) {
 }
 createPullRequest.VERSION = VERSION;
 
-promisify(exec$1);
+const execAsync = promisify(exec$1);
 const TOKEN = coreExports.getInput("GITHUB_TOKEN", { required: true });
 const MyOctoKit = Octokit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
@@ -58235,10 +58235,10 @@ const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? "";
 //===============================================
 async function calculateMetaData() {
     try {
-        // const laborHours = await getLaborHours()
+        const laborHours = await getLaborHours();
         const dateFeilds = await getDateFields();
         return {
-            // laborHours: laborHours,
+            laborHours: laborHours,
             date: dateFeilds
         };
     }
@@ -58267,6 +58267,19 @@ async function getDateFields() {
             lastModified: "",
             metaDataLastUpdated: ""
         };
+    }
+}
+async function getLaborHours() {
+    try {
+        // const filesToExclude = "checks.yml,auto-changelog.yml,contributors.yml,repoStructure.yml,code.json,checklist.md,checklist.pdf,README.md,CONTIRBUTING.md,LICENSE,MAINTAINERS.md,repolinter.json,SECURITY.md,CODE_OF_CONDUCT.md,CODEOWNERS.md,COMMUNITY_GUIDELINES.md,GOVERANCE.md"
+        // add this in later
+        const { stdout } = await execAsync(`scc .. --format json2`);
+        const json = JSON.parse(stdout);
+        const laborHours = Math.ceil(json["estimatedScheduleMonths"] * 730.001);
+        return laborHours;
+    }
+    catch (error) {
+        throw new Error(`Failed to run SCC: ${error}`);
     }
 }
 //===============================================

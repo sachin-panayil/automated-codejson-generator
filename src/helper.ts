@@ -31,11 +31,11 @@ const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? ""
 //===============================================
 export async function calculateMetaData() {
   try {
-    // const laborHours = await getLaborHours()
+    const laborHours = await getLaborHours()
     const dateFeilds = await getDateFields()
     
     return {
-      // laborHours: laborHours,
+      laborHours: laborHours,
       date: dateFeilds
     }
 
