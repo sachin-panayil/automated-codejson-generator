@@ -71,31 +71,9 @@ async function getDateFields(): Promise<CodeDate> {
 }
 
 async function getLaborHours(): Promise<number> {
-  interface LanguageSummary {
-    Name: string;
-    Bytes: number;
-    CodeBytes: number;
-    Lines: number;
-    Code: number;
-    Comment: number;
-    Blank: number;
-    Complexity: number;
-    Count: number;
-    WeightedComplexity: number;
-    Files: string[];
-    LineLength: null | number;
-    ULOC: number;
-  }
-  
-  interface SCCOutput {
-    languageSummary: LanguageSummary[];
-    estimatedCost: number;
-    estimatedScheduleMonths: number;
-    estimatedPeople: number;
-  }
-
   try {
     const { stdout } = await execAsync(`scc .`);
+    core.info(stdout)
     
     const scheduleMatch = stdout.match(/Estimated Schedule Effort \(organic\) ([\d.]+) months/);
     
@@ -104,7 +82,11 @@ async function getLaborHours(): Promise<number> {
     }
     
     const estimatedMonths = parseFloat(scheduleMatch[1]);
+    core.info(estimatedMonths.toString())
+
     const laborHours = Math.ceil(estimatedMonths * 730.001);
+    core.info(laborHours.toString())
+
     return laborHours;
 } catch (error) {
     console.error('Raw command output:', error);

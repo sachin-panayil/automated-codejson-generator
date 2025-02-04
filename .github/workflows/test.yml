@@ -24,7 +24,12 @@ jobs:
           node-version: '20'
 
       - name: Install SCC
-        run: sudo snap install scc
+        run: |
+          wget https://github.com/boyter/scc/releases/download/v3.4.0/scc-3.4.0-linux-amd64.zip
+          unzip scc-3.4.0-linux-amd64.zip
+          sudo mv scc /usr/local/bin/
+          sudo chmod +x /usr/local/bin/scc
+          scc --version
       
       - name: Update code.json
         uses: ./ 

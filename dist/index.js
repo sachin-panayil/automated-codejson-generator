@@ -58272,12 +58272,15 @@ async function getDateFields() {
 async function getLaborHours() {
     try {
         const { stdout } = await execAsync(`scc .`);
+        coreExports.info(stdout);
         const scheduleMatch = stdout.match(/Estimated Schedule Effort \(organic\) ([\d.]+) months/);
         if (!scheduleMatch) {
             throw new Error('Could not find schedule effort in output');
         }
         const estimatedMonths = parseFloat(scheduleMatch[1]);
+        coreExports.info(estimatedMonths.toString());
         const laborHours = Math.ceil(estimatedMonths * 730.001);
+        coreExports.info(laborHours.toString());
         return laborHours;
     }
     catch (error) {
