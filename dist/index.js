@@ -58271,13 +58271,13 @@ async function getDateFields() {
 }
 async function getLaborHours() {
     try {
-        const { stdout } = await execAsync(`scc . --format json2 2>/dev/null`);
-        console.log(stdout);
-        console.log("---------------------------------");
-        const sccData = JSON.parse(stdout);
-        console.log(sccData);
-        console.log("---------------------------------");
-        const laborHours = Math.ceil(sccData.estimatedScheduleMonths * 730.001);
+        const { stdout } = await execAsync(`scc .`);
+        const scheduleMatch = stdout.match(/Estimated Schedule Effort \(organic\) ([\d.]+) months/);
+        if (!scheduleMatch) {
+            throw new Error('Could not find schedule effort in output');
+        }
+        const estimatedMonths = parseFloat(scheduleMatch[1]);
+        const laborHours = Math.ceil(estimatedMonths * 730.001);
         return laborHours;
     }
     catch (error) {
