@@ -48,11 +48,14 @@ async function getMetaData(): Promise<Partial<CodeJSON>> {
   const partialCodeJSON = await helpers.calculateMetaData()
 
   return {
+    name: partialCodeJSON.name,
+    description: partialCodeJSON.description,
+    repositoryURL: partialCodeJSON.repositoryURL,
     laborHours: partialCodeJSON?.laborHours,
     date: {
-      created: partialCodeJSON?.date.created ?? "", // need better default values here
-      lastModified: partialCodeJSON?.date.lastModified ?? "",
-      metaDataLastUpdated: partialCodeJSON?.date.metaDataLastUpdated ?? ""
+      created: partialCodeJSON.date?.created ?? "",
+      lastModified: partialCodeJSON.date?.lastModified ?? "",
+      metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString()
     }
   }
 }

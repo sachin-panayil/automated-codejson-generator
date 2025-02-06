@@ -44,3 +44,9 @@ export interface Contact {
     email: string;
     name: string;
 }
+export interface BasicRepoInfo {
+    title: string;
+    description: string;
+    url: string;
+    date: Date;
+}

@@ -49,4 +49,9 @@ export interface Contact {
   name: string
 }
 
-
+export interface BasicRepoInfo {
+  title: string
+  description: string
+  url: string
+  date: Date
+}

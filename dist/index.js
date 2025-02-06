@@ -58230,55 +58230,62 @@ const octokit = new MyOctoKit({
 });
 const owner = process.env.GITHUB_REPOSITORY_OWNER ?? "";
 const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? "";
+const HOURS_PER_MONTH = 730.001;
 //===============================================
 // Meta Data
 //===============================================
 async function calculateMetaData() {
     try {
-        const laborHours = await getLaborHours();
-        const dateFeilds = await getDateFields();
+        const [laborHours, basicInfo] = await Promise.all([
+            getLaborHours(),
+            getBasicInfo()
+        ]);
         return {
+            name: basicInfo.title,
+            description: basicInfo.description,
+            repositoryURL: basicInfo.url,
             laborHours: laborHours,
-            date: dateFeilds
+            date: {
+                created: basicInfo.date.created,
+                lastModified: basicInfo.date.lastModified,
+                metaDataLastUpdated: basicInfo.date.metaDataLastUpdated
+            }
         };
     }
     catch (error) {
-        console.log(`Error with calculating meta data: ${error}`);
-        return null;
+        coreExports.error(`Failed to calculate meta data: ${error}`);
+        throw error;
     }
 }
-async function getDateFields() {
+async function getBasicInfo() {
     try {
-        if (!owner || !repo) {
-            throw new Error('Unable to determine repository owner or name from environment');
-        }
         const repoData = await octokit.rest.repos.get({ owner, repo });
-        const dates = {
-            created: repoData.data.created_at,
-            lastModified: repoData.data.updated_at,
-            metaDataLastUpdated: new Date().toISOString()
+        return {
+            title: repoData.data.name,
+            description: repoData.data.description ?? "",
+            url: repoData.data.html_url,
+            date: {
+                created: repoData.data.created_at,
+                lastModified: repoData.data.updated_at,
+                metaDataLastUpdated: new Date().toISOString()
+            }
         };
-        return dates;
     }
     catch (error) {
-        console.log(`Error getting date: ${error}`);
-        return {
-            created: "",
-            lastModified: "",
-            metaDataLastUpdated: ""
-        };
+        coreExports.error(`Failed to get basic info: ${error}`);
+        throw error;
     }
 }
 async function getLaborHours() {
     try {
         const { stdout } = await execAsync(`scc . --format json2`);
         const sccData = JSON.parse(stdout);
-        const laborHours = Math.ceil(sccData["estimatedScheduleMonths"] * 730.001);
+        const laborHours = Math.ceil(sccData["estimatedScheduleMonths"] * HOURS_PER_MONTH);
         return laborHours;
     }
     catch (error) {
-        console.error('Raw command output:', error);
-        throw new Error(`Failed to run SCC: ${error}`);
+        coreExports.error(`Failed to get labor hours: ${error}`);
+        throw error;
     }
 }
 //===============================================
@@ -58369,11 +58376,14 @@ const baselineCodeJSON = {
 async function getMetaData() {
     const partialCodeJSON = await calculateMetaData();
     return {
+        name: partialCodeJSON.name,
+        description: partialCodeJSON.description,
+        repositoryURL: partialCodeJSON.repositoryURL,
         laborHours: partialCodeJSON?.laborHours,
         date: {
-            created: partialCodeJSON?.date.created ?? "", // need better default values here
-            lastModified: partialCodeJSON?.date.lastModified ?? "",
-            metaDataLastUpdated: partialCodeJSON?.date.metaDataLastUpdated ?? ""
+            created: partialCodeJSON.date?.created ?? "",
+            lastModified: partialCodeJSON.date?.lastModified ?? "",
+            metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString()
         }
     };
 }

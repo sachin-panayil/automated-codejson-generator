@@ -1,13 +1,12 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 import * as fs from 'fs/promises';
 
-import { Octokit as ActionKit, Octokit } from '@octokit/action'
+import { Octokit as ActionKit } from '@octokit/action'
 import { createPullRequest } from "octokit-plugin-create-pull-request"
 import { exec } from 'child_process'
 import { promisify } from 'util';
 
-import { CodeJSON, Date as CodeDate } from './model.js'
+import { CodeJSON, BasicRepoInfo} from './model.js'
 
 const execAsync = promisify(exec);
 
@@ -26,48 +25,56 @@ const octokit = new MyOctoKit({
 const owner = process.env.GITHUB_REPOSITORY_OWNER ?? ""
 const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? ""
 
+const HOURS_PER_MONTH = 730.001
+
 //===============================================
 // Meta Data
 //===============================================
-export async function calculateMetaData() {
+export async function calculateMetaData(): Promise<Partial<CodeJSON>> {
   try {
-    const laborHours = await getLaborHours()
-    const dateFeilds = await getDateFields()
+    const [laborHours, basicInfo] = await Promise.all([
+      getLaborHours(),
+      getBasicInfo()
+    ])
     
     return {
+      name: basicInfo.title,
+      description: basicInfo.description,
+      repositoryURL: basicInfo.url,
       laborHours: laborHours,
-      date: dateFeilds
+      date: {
+        created: basicInfo.date.created,
+        lastModified: basicInfo.date.lastModified,
+        metaDataLastUpdated: basicInfo.date.metaDataLastUpdated
+      }
     }
 
   } catch (error) {
-    console.log(`Error with calculating meta data: ${error}`)
-    return null
+    core.error(`Failed to calculate meta data: ${error}`) 
+    throw error 
   }
 }
 
-async function getDateFields(): Promise<CodeDate> {
+async function getBasicInfo(): Promise<BasicRepoInfo> {
   try {
-    if (!owner || !repo) {
-      throw new Error('Unable to determine repository owner or name from environment');
-    }
-
     const repoData = await octokit.rest.repos.get({owner,repo})
 
-    const dates: CodeDate = {
-      created: repoData.data.created_at,         
-      lastModified: repoData.data.updated_at,      
-      metaDataLastUpdated: new Date().toISOString()
+    return {
+      title: repoData.data.name,
+      description: repoData.data.description ?? "",
+      url: repoData.data.html_url,
+      date: {
+        created: repoData.data.created_at,         
+        lastModified: repoData.data.updated_at,      
+        metaDataLastUpdated: new Date().toISOString()
+      }
     }
 
-    return dates
   } catch (error) {
-    console.log(`Error getting date: ${error}`)
-    return {
-      created: "",
-      lastModified: "",
-      metaDataLastUpdated: "" 
-    }
+    core.error(`Failed to get basic info: ${error}`)
+    throw error 
   }
+
 }
 
 async function getLaborHours(): Promise<number> {
@@ -75,12 +82,16 @@ async function getLaborHours(): Promise<number> {
     const { stdout } = await execAsync(`scc . --format json2`)
     const sccData = JSON.parse(stdout)
 
-    const laborHours = Math.ceil(sccData["estimatedScheduleMonths"] * 730.001)
+    const laborHours = Math.ceil(sccData["estimatedScheduleMonths"] * HOURS_PER_MONTH)
     return laborHours
   } catch (error) {
-    console.error('Raw command output:', error)
-    throw new Error(`Failed to run SCC: ${error}`)
+    core.error(`Failed to get labor hours: ${error}`) 
+    throw error 
   }
+}
+
+async function getProgrammingLanguages(): Promise<string[]> {
+  return ["test"]
 }
 
 //===============================================
