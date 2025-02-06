@@ -1,10 +1,45 @@
 {
-  "projectType": "Website",
+  "name": "automated-codejson-generator",
+  "description": "",
+  "longDescription": "",
+  "status": "",
+  "permissions": {
+    "license": [
+      {
+        "name": "",
+        "URL": ""
+      }
+    ],
+    "usageType": "",
+    "exemptionText": ""
+  },
+  "organization": "",
+  "repositoryURL": "https://github.com/sachin-panayil/automated-codejson-generator",
+  "vcs": "git",
+  "laborHours": 11705,
+  "platforms": [],
+  "categories": [],
+  "softwareType": "",
+  "languages": [],
+  "maintenance": "",
+  "date": {
+    "created": "2025-01-24T21:04:38Z",
+    "lastModified": "2025-02-06T19:03:36Z",
+    "metaDataLastUpdated": "2025-02-06T19:04:01.230Z"
+  },
+  "tags": [],
+  "contact": {
+    "email": "",
+    "name": ""
+  },
+  "localisation": false,
+  "repositoryType": "",
   "userInput": "No",
   "fismaLevel": "Low",
   "group": "CMS/OA/DSAC",
   "subsetInHealthcare": "Operational",
   "userType": "Government",
   "repositoryHost": "Github.com",
-  "maturityModelTier": "3"
+  "maturityModelTier": "3",
+  "projectType": "Website"
 }
