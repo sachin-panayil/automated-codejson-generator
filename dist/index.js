@@ -58317,12 +58317,12 @@ async function readJSON(filepath) {
 async function sendPR(updatedCodeJSON) {
     try {
         const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
-        const branchName = `code-json-${new Date().getTime()}`;
+        const branchName = `code-json-${new Date().toLocaleTimeString()}`;
         const PR = await octokit.createPullRequest({
             owner,
             repo,
             title: 'Update code.json',
-            body: 'This PR updates the code.json file',
+            body: bodyOfPR(),
             base: 'main',
             head: branchName,
             changes: [{
@@ -58342,6 +58342,16 @@ async function sendPR(updatedCodeJSON) {
     catch (error) {
         coreExports.error(`Failed to create PR: ${error}`);
     }
+}
+function bodyOfPR() {
+    return `
+  ## Next Steps
+  ### Add Missing Information to code.json
+  - We have automatically calculated some fields but the majority require manual input
+  - Please enter the missing fields by directly editing code.json in Files Changed
+  - We also have a [formsite](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website.
+    - You can copy and paste your code.json from the website into here.
+  `;
 }
 
 const baselineCodeJSON = {
