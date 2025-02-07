@@ -58293,7 +58293,7 @@ async function getLaborHours() {
 async function getProgrammingLanguages() {
     try {
         const repoData = await octokit.rest.repos.listLanguages({ owner, repo });
-        const languages = Object.keys(repoData);
+        const languages = Object.keys(repoData.data);
         return languages;
     }
     catch (error) {

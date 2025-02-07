@@ -95,7 +95,7 @@ async function getLaborHours(): Promise<number> {
 async function getProgrammingLanguages(): Promise<string[]> {
   try {
     const repoData = await octokit.rest.repos.listLanguages({owner, repo})
-    const languages = Object.keys(repoData)
+    const languages = Object.keys(repoData.data)
 
     return languages
   } catch (error) {
