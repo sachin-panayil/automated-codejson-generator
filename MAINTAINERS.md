@@ -27,3 +27,8 @@ Scripting
 | reviewer | review contributions from other members | history of review and authorship in a sub-project | MAINTAINERS file reviewer entry, and GitHub Org Triage Team |
 | approver | approve accepting contributions | highly experienced and active reviewer + contributor to a sub-project | MAINTAINERS file approver entry and GitHub Triage Team |
 | lead | set direction and priorities for a sub-project | demonstrated responsibility and excellent technical judgement for the sub-project | MAINTAINERS file owner entry and GitHub Org Admin Team |
+
+Total number of contributors: <!--CONTRIBUTOR COUNT START--> <!--CONTRIBUTOR COUNT END-->
+
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
