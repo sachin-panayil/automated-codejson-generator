@@ -58317,7 +58317,7 @@ async function readJSON(filepath) {
 async function sendPR(updatedCodeJSON) {
     try {
         const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
-        const branchName = `code-json-${new Date().toLocaleTimeString()}`;
+        const branchName = `code-json-${Math.random()}`;
         const PR = await octokit.createPullRequest({
             owner,
             repo,
