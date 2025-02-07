@@ -58236,15 +58236,17 @@ const HOURS_PER_MONTH = 730.001;
 //===============================================
 async function calculateMetaData() {
     try {
-        const [laborHours, basicInfo] = await Promise.all([
+        const [laborHours, basicInfo, languages] = await Promise.all([
             getLaborHours(),
-            getBasicInfo()
+            getBasicInfo(),
+            getProgrammingLanguages()
         ]);
         return {
             name: basicInfo.title,
             description: basicInfo.description,
             repositoryURL: basicInfo.url,
             laborHours: laborHours,
+            languages: languages,
             date: {
                 created: basicInfo.date.created,
                 lastModified: basicInfo.date.lastModified,
@@ -58285,6 +58287,17 @@ async function getLaborHours() {
     }
     catch (error) {
         coreExports.error(`Failed to get labor hours: ${error}`);
+        throw error;
+    }
+}
+async function getProgrammingLanguages() {
+    try {
+        const repoData = await octokit.rest.repos.listLanguages({ owner, repo });
+        const languages = Object.keys(repoData);
+        return languages;
+    }
+    catch (error) {
+        coreExports.error(`Failed to get languages: ${error}`);
         throw error;
     }
 }
@@ -58380,6 +58393,7 @@ async function getMetaData() {
         description: partialCodeJSON.description,
         repositoryURL: partialCodeJSON.repositoryURL,
         laborHours: partialCodeJSON?.laborHours,
+        languages: partialCodeJSON.languages,
         date: {
             created: partialCodeJSON.date?.created ?? "",
             lastModified: partialCodeJSON.date?.lastModified ?? "",

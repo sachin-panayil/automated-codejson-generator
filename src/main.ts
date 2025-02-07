@@ -52,6 +52,7 @@ async function getMetaData(): Promise<Partial<CodeJSON>> {
     description: partialCodeJSON.description,
     repositoryURL: partialCodeJSON.repositoryURL,
     laborHours: partialCodeJSON?.laborHours,
+    languages: partialCodeJSON.languages,
     date: {
       created: partialCodeJSON.date?.created ?? "",
       lastModified: partialCodeJSON.date?.lastModified ?? "",
