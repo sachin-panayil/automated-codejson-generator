@@ -1,4 +1,4 @@
-name: Test Code.json Action
+name: Update Code.json
 on:
   workflow_dispatch:
   push:
