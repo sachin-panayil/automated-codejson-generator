@@ -16,7 +16,7 @@
   "organization": "Centers for Medicare & Medicaid Services",
   "repositoryURL": "https://github.com/DSACMS/automated-codejson-generator",
   "vcs": "git",
-  "laborHours": 11694,
+  "laborHours": 11702,
   "platforms": [
     "web",
     "linux"
@@ -27,17 +27,14 @@
   ],
   "softwareType": "standalone/backend",
   "languages": [
-    "HTML",
-    "JavaScript",
     "TypeScript",
-    "CSS",
-    "Shell"
+    "JavaScript"
   ],
   "maintenance": "internal",
   "date": {
     "created": "2025-02-07T16:29:38Z",
-    "lastModified": "2025-02-07T16:55:55Z",
-    "metaDataLastUpdated": "2025-02-07T16:55:56.645Z"
+    "lastModified": "2025-02-07T21:44:41Z",
+    "metaDataLastUpdated": "2025-02-07T21:45:22.738Z"
   },
   "tags": [
     "github-action",
@@ -52,8 +49,12 @@
   "userInput": false,
   "fismaLevel": "Low",
   "group": "CMS/OA/DSAC",
-  "subsetInHealthcare": ["Operational"],
-  "userType": ["Government"],
+  "subsetInHealthcare": [
+    "Operational"
+  ],
+  "userType": [
+    "Government"
+  ],
   "repositoryHost": "github.com/DSACMS",
   "maturityModelTier": 3
 }
