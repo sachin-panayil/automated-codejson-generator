@@ -6,6 +6,54 @@ A GitHub Action that automatically generates and maintains code.json files for f
 
 This project provides a GitHub Action that helps federal agencies maintain their code.json files, which are required for compliance with the Federal Source Code Policy. The action automatically calculates and updates various metadata fields including labor hours, programming languages used, repository information, and timestamps. It creates pull requests with these updates, making it easier to keep code.json files accurate and up-to-date.
 
+## Inputs
+
+```yaml
+GITHUB_TOKEN:
+  description: 'GitHub token used for API access'
+  required: true
+  default: ${{ github.token }}
+```
+
+## Usage 
+### Create a PR to add compliant code.json
+```yaml
+name: Update Code.json
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-code-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      
+      - name: Install SCC
+        run: go install github.com/boyter/scc/v3@latest
+      
+      - name: Update code.json
+        uses: ./ 
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
 ## Project Vision
 
 To streamline federal agencies' compliance with open source requirements by automating the maintenance of code.json files, reducing manual effort and improving accuracy of repository metadata.
@@ -41,13 +89,13 @@ An up-to-date list of core team members can be found in [MAINTAINERS.md](MAINTAI
 ```
 .
 ├── src/
-│   ├── model.ts           # TypeScript interfaces for code.json schema
+│   ├── model.ts          # TypeScript interfaces for code.json schema
 │   ├── main.ts           # Main action logic
 │   ├── helper.ts         # Helper functions for GitHub API interactions
 │   └── index.ts          # Action entrypoint
 ├── .github/
 │   └── workflows/        # GitHub Actions workflow definitions
-└── action.yml           # Action metadata file
+└── action.yml            # Action metadata file
 ```
 
 ## Development and Software Delivery Lifecycle
@@ -61,7 +109,7 @@ To develop locally:
 1. Clone the repository
 2. Install dependencies with `npm install`
 3. Install Go and SCC tool: `go install github.com/boyter/scc/v3@latest`
-4. Build the project with `npm run build`
+4. Build the project with `npm run package`
 5. Run tests with `npm test`
 
 ## Coding Style and Linters

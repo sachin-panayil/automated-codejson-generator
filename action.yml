@@ -1,18 +1,19 @@
-name: code.json Auto Generator
-description: 'Manages code.json files in repositories, ensuring schema consistency and auto-calculation of certain fields'
+name: Code.json Generator
+description: 'Automatically generates and updates code.json metadata files for CMS repositories'
 author: DSACMS
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
-branding:
-  icon: heart
-  color: red
-
-# Define your inputs here.
 inputs:
   GITHUB_TOKEN:
-    description: 'GitHub token for API access'
+    description: 'GitHub token used for API access'
     required: true
     default: ${{ github.token }}
+
+outputs:
+  updated:
+    description: 'Boolean indicating whether code.json was updated'
+  pr_url:
+    description: 'URL of the created pull request if changes were made'
+
 runs:
   using: node20
   main: dist/index.js

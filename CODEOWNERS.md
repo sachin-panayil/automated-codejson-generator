@@ -1,5 +1,7 @@
 # Code Owners 
 <!-- TODO: Who are the points of contact in your project who are responsible/accountable for the project? This can often be an engineering or design manager or leader, who may or may not be the primary maintainers of the project. List them by GitHub Username--> 
+
+- [@sachin-panayil](https://github.com/sachin-panayil)
  
  ## Repository Domains
  <!--
@@ -15,3 +17,6 @@ To set up GitHub teams:
 - Add the relevant members to each team. Ensure that the team includes all the individuals who should be notified about PRs in their domain.
 - When filling out the Repo Domains section in your CODEOWNERS.md file, use the team handles instead of or alongside individual usernames. This way, when a contributor opens a PR affecting a specific domain, they can simply tag the team, and every member of that team will be notified.
 --> 
+
+- Github Action Script in /src/ - [@sachin-panayil](https://github.com/sachin-panayil)
+
