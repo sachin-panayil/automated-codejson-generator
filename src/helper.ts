@@ -120,7 +120,7 @@ export async function readJSON(filepath: string): Promise<CodeJSON | null> {
 export async function sendPR(updatedCodeJSON: CodeJSON) {
    try {
     const formattedContent = JSON.stringify(updatedCodeJSON, null, 2)
-    const branchName = `code-json-${Math.random()}`
+    const branchName = `code-json-${new Date().getTime()}`
 
     const PR = await octokit.createPullRequest({
       owner,
