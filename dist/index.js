@@ -58325,6 +58325,7 @@ async function sendPR(updatedCodeJSON) {
             body: bodyOfPR(),
             base: 'main',
             head: branchName,
+            labels: ["codejson-initialized"],
             changes: [{
                     files: {
                         'code.json': formattedContent

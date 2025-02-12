@@ -129,6 +129,7 @@ export async function sendPR(updatedCodeJSON: CodeJSON) {
       body: bodyOfPR(),
       base: 'main',
       head: branchName,
+      labels: ["codejson-initialized"],
       changes: [{
         files: {
           'code.json': formattedContent
