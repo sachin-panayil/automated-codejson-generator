@@ -11,6 +11,8 @@ import { CodeJSON, BasicRepoInfo} from './model.js'
 const execAsync = promisify(exec);
 
 const TOKEN = core.getInput("GITHUB_TOKEN", { required: true })
+const FEDERAL = core.getInput("FEDERAL", { required: false }) === 'true'
+
 const MyOctoKit = ActionKit.plugin(createPullRequest)
 const octokit = new MyOctoKit({
   auth: TOKEN,
@@ -126,7 +128,7 @@ export async function sendPR(updatedCodeJSON: CodeJSON) {
       owner,
       repo,
       title: 'Update code.json',
-      body: bodyOfPR(),
+      body: bodyOfPR(FEDERAL),
       base: 'main',
       head: branchName,
       labels: ["codejson-initialized"],
@@ -149,13 +151,34 @@ export async function sendPR(updatedCodeJSON: CodeJSON) {
   }
 }
 
-function bodyOfPR(): string {
-  return `
-  ## Next Steps
-  ### Add Missing Information to code.json
-  - We have automatically calculated some fields but the majority require manual input
-  - Please enter the missing fields by directly editing code.json in Files Changed
-  - We also have a [formsite](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website.
-    - You can copy and paste your code.json from the website into here.
-  `
+function bodyOfPR(federal: boolean): string {
+  if (federal) {
+    return `
+    Hello, and thank you for your contributions to the Federal Open Source Community 🙏
+    \n \n
+
+    Pull requests adding [code.json repository metadata](https://github.com/DSACMS/gov-codejson/blob/main/docs/metadata.md) is being sent on behalf of the CMS Source Code Stewardship Taskforce(link?), in compliance with [The Federal Source Code Inventory Policy](https://code.gov/agency-compliance/compliance/inventory-code), [M-16-21](https://obamawhitehouse.archives.gov/sites/default/files/omb/memoranda/2016/m_16_21.pdf), and in preparation for the [SHARE IT Act of 2024](https://www.congress.gov/bill/118th-congress/house-bill/9566). If you have questions, you can reach out to the [CMS Open Source Program Office](opensource@cms.hhs.gov) or file an issue [here](https://github.com/DSACMS/automated-codejson-generator/issues).
+    \n \n
+
+    ## Next Steps
+    ### Add Missing Information to code.json
+      - We have automatically calculated some fields but the majority require manual input
+      - Please enter the missing fields by directly editing code.json in Files Changed
+      - We also have a [formsite](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website.
+      - You can copy and paste your code.json from the website into here.
+    \n \n
+
+    If you would like additional information, please click this [link](https://github.com/DSACMS/gov-codejson).
+    `
+  } else {
+    return `
+    ## Next Steps
+    ### Add Missing Information to code.json
+      - We have automatically calculated some fields but the majority require manual input
+      - Please enter the missing fields by directly editing code.json in Files Changed
+      - We also have a [formsite](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website.
+      - You can copy and paste your code.json from the website into here.
+    `
+  }
+
 }
