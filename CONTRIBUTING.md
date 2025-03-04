@@ -41,6 +41,7 @@ npm test
 ### Workflow and Branching
 
 We follow the [GitHub Flow Workflow](https://guides.github.com/introduction/flow/):
+
 1. Fork the project
 2. Check out the `main` branch
 3. Create a feature branch
@@ -71,20 +72,25 @@ When creating an issue please try to adhere to the following format:
 
 ```markdown
 ### Description
+
 Clear description of the issue or feature request
 
 ### Expected behavior
+
 What should happen
 
 ### Actual behavior
+
 What is happening (for bugs)
 
 ### Steps to reproduce
+
 1. Step one
 2. Step two
 3. Step three
 
 ### Additional context
+
 Any other relevant information
 ```
 
@@ -106,6 +112,7 @@ feat(scope): description of feature
 ### Reviewing Pull Requests
 
 Pull requests are reviewed by the maintainers listed in [MAINTAINERS.md](MAINTAINERS.md). Reviews will check for:
+
 - Code quality and style
 - Test coverage
 - Documentation updates
@@ -119,6 +126,7 @@ Releases are created by maintainers as needed when significant changes are merge
 ## Documentation
 
 Documentation improvements are always welcome! Please file an issue first to discuss any major changes. Key areas for documentation:
+
 - README.md updates
 - Code comments
 - Example workflows
@@ -132,7 +140,7 @@ We adhere to the [CMS Open Source Policy](https://github.com/CMSGov/cms-open-sou
 
 ### Security and Responsible Disclosure Policy
 
-*Submit a vulnerability:* Vulnerability reports can be submitted through [Bugcrowd](https://bugcrowd.com/cms-vdp). Reports may be submitted anonymously. If you share contact information, we will acknowledge receipt of your report within 3 business days.
+_Submit a vulnerability:_ Vulnerability reports can be submitted through [Bugcrowd](https://bugcrowd.com/cms-vdp). Reports may be submitted anonymously. If you share contact information, we will acknowledge receipt of your report within 3 business days.
 
 For more information about our Security, Vulnerability, and Responsible Disclosure Policies, see [SECURITY.md](SECURITY.md).
 

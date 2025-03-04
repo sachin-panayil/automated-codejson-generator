@@ -58225,11 +58225,11 @@ const octokit = new MyOctoKit({
         debug: coreExports.debug,
         info: coreExports.info,
         warn: coreExports.warning,
-        error: coreExports.error
-    }
+        error: coreExports.error,
+    },
 });
 const owner = process.env.GITHUB_REPOSITORY_OWNER ?? "";
-const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? "";
+const repo = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "";
 const HOURS_PER_MONTH = 730.001;
 //===============================================
 // Meta Data
@@ -58239,7 +58239,7 @@ async function calculateMetaData() {
         const [laborHours, basicInfo, languages] = await Promise.all([
             getLaborHours(),
             getBasicInfo(),
-            getProgrammingLanguages()
+            getProgrammingLanguages(),
         ]);
         return {
             name: basicInfo.title,
@@ -58250,8 +58250,8 @@ async function calculateMetaData() {
             date: {
                 created: basicInfo.date.created,
                 lastModified: basicInfo.date.lastModified,
-                metaDataLastUpdated: basicInfo.date.metaDataLastUpdated
-            }
+                metaDataLastUpdated: basicInfo.date.metaDataLastUpdated,
+            },
         };
     }
     catch (error) {
@@ -58269,8 +58269,8 @@ async function getBasicInfo() {
             date: {
                 created: repoData.data.created_at,
                 lastModified: repoData.data.updated_at,
-                metaDataLastUpdated: new Date().toISOString()
-            }
+                metaDataLastUpdated: new Date().toISOString(),
+            },
         };
     }
     catch (error) {
@@ -58306,7 +58306,7 @@ async function getProgrammingLanguages() {
 //===============================================
 async function readJSON(filepath) {
     try {
-        const fileContent = await fs.readFile(filepath, 'utf8');
+        const fileContent = await fs.readFile(filepath, "utf8");
         return JSON.parse(fileContent);
     }
     catch (error) {
@@ -58321,17 +58321,19 @@ async function sendPR(updatedCodeJSON) {
         const PR = await octokit.createPullRequest({
             owner,
             repo,
-            title: 'Update code.json',
+            title: "Update code.json",
             body: bodyOfPR(),
-            base: 'main',
+            base: "main",
             head: branchName,
             labels: ["codejson-initialized"],
-            changes: [{
+            changes: [
+                {
                     files: {
-                        'code.json': formattedContent
+                        "code.json": formattedContent,
                     },
-                    commit: 'Update code.json metadata'
-                }]
+                    commit: "Update code.json metadata",
+                },
+            ],
         });
         if (PR) {
             coreExports.info(`Successfully created PR: ${PR.data.html_url}`);
@@ -58346,56 +58348,66 @@ async function sendPR(updatedCodeJSON) {
 }
 function bodyOfPR() {
     return `
-  ## Next Steps
-  ### Add Missing Information to code.json
-  - We have automatically calculated some fields but the majority require manual input
-  - Please enter the missing fields by directly editing code.json in Files Changed
-  - We also have a [formsite](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website.
-    - You can copy and paste your code.json from the website into here.
+    Hello, and thank you for your contributions to the Federal Open Source Community. 🙏
+    \n \n
+
+    This pull request adding [code.json repository metadata](https://github.com/DSACMS/gov-codejson/blob/main/docs/metadata.md) is being sent on behalf of the CMS Source Code Stewardship Taskforce, in compliance with [The Federal Source Code Inventory Policy](https://code.gov/agency-compliance/compliance/inventory-code), [M-16-21](https://obamawhitehouse.archives.gov/sites/default/files/omb/memoranda/2016/m_16_21.pdf), and in preparation for the [SHARE IT Act of 2024](https://www.congress.gov/bill/118th-congress/house-bill/9566). If you have questions, please file an issue [here](https://github.com/DSACMS/automated-codejson-generator/issues) or join our #cms-ospo slack channel [here](https://cmsgov.enterprise.slack.com/archives/C07HM92S9QQ).
+    \n \n
+
+    ## Next Steps
+    ### Add Missing Information to code.json
+      - We have automatically calculated some fields but many require manual input
+      - Please enter the missing fields by directly editing code.json in Files Changed tab on your pull-request
+      - We also have a [form](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website, and then download directly to your local machine, and then you can copy and paste into here.
+    \n \n
+
+    If you would like additional information about the code.json metadata requirements, please visit the repository [here](https://github.com/DSACMS/gov-codejson).
   `;
 }
 
 const baselineCodeJSON = {
-    name: '',
-    description: '',
-    longDescription: '',
-    status: '',
+    name: "",
+    description: "",
+    longDescription: "",
+    status: "",
     permissions: {
-        license: [{
-                name: '',
-                URL: ''
-            }],
-        usageType: '',
-        exemptionText: ''
+        license: [
+            {
+                name: "",
+                URL: "",
+            },
+        ],
+        usageType: "",
+        exemptionText: "",
     },
-    organization: '',
-    repositoryURL: '',
-    vcs: 'git',
+    organization: "",
+    repositoryURL: "",
+    vcs: "git",
     laborHours: 0,
     platforms: [],
     categories: [],
-    softwareType: '',
+    softwareType: "",
     languages: [],
-    maintenance: '',
+    maintenance: "",
     date: {
-        created: '',
-        lastModified: '',
-        metaDataLastUpdated: ''
+        created: "",
+        lastModified: "",
+        metaDataLastUpdated: "",
     },
     tags: [],
     contact: {
-        email: '',
-        name: ''
+        email: "",
+        name: "",
     },
     localisation: false,
-    repositoryType: '',
+    repositoryType: "",
     userInput: false,
-    fismaLevel: '',
-    group: '',
+    fismaLevel: "",
+    group: "",
     subsetInHealthcare: [],
     userType: [],
-    repositoryHost: 'github',
-    maturityModelTier: 0
+    repositoryHost: "github",
+    maturityModelTier: 0,
 };
 async function getMetaData() {
     const partialCodeJSON = await calculateMetaData();
@@ -58408,8 +58420,8 @@ async function getMetaData() {
         date: {
             created: partialCodeJSON.date?.created ?? "",
             lastModified: partialCodeJSON.date?.lastModified ?? "",
-            metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString()
-        }
+            metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
+        },
     };
 }
 async function run() {
@@ -58420,13 +58432,13 @@ async function run() {
         finalCodeJSON = {
             ...baselineCodeJSON,
             ...currentCodeJSON,
-            ...metaData
+            ...metaData,
         };
     }
     else {
         finalCodeJSON = {
             ...baselineCodeJSON,
-            ...metaData
+            ...metaData,
         };
     }
     sendPR(finalCodeJSON);

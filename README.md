@@ -10,13 +10,15 @@ This project provides a GitHub Action that helps federal agencies maintain their
 
 ```yaml
 GITHUB_TOKEN:
-  description: 'GitHub token used for API access'
+  description: "GitHub token used for API access"
   required: true
   default: ${{ github.token }}
 ```
 
-## Usage 
+## Usage
+
 ### Create a PR to add compliant code.json
+
 ```yaml
 name: Update Code.json
 on:
@@ -33,21 +35,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  
-      
+          fetch-depth: 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
-      
+          go-version: "1.22"
+
       - name: Install SCC
         run: go install github.com/boyter/scc/v3@latest
-      
+
       - name: Update code.json
         uses: DSACMS/automated-codejson-generator@main
         with:
@@ -120,10 +122,10 @@ This project uses TypeScript and follows standard TypeScript conventions. Lint a
 
 This project follows trunk-based development:
 
-* Make small changes in short-lived feature branches and merge to `main` frequently
-* Each change merged to `main` should be immediately deployable
-* Pull requests are required for all changes
-* Changes are deployed automatically via GitHub Actions
+- Make small changes in short-lived feature branches and merge to `main` frequently
+- Each change merged to `main` should be immediately deployable
+- Pull requests are required for all changes
+- Changes are deployed automatically via GitHub Actions
 
 ## Contributing
 

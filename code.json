@@ -17,29 +17,17 @@
   "repositoryURL": "https://github.com/DSACMS/automated-codejson-generator",
   "vcs": "git",
   "laborHours": 11702,
-  "platforms": [
-    "web",
-    "linux"
-  ],
-  "categories": [
-    "developer-tools",
-    "automation"
-  ],
+  "platforms": ["web", "linux"],
+  "categories": ["developer-tools", "automation"],
   "softwareType": "standalone/backend",
-  "languages": [
-    "TypeScript",
-    "JavaScript"
-  ],
+  "languages": ["TypeScript", "JavaScript"],
   "maintenance": "internal",
   "date": {
     "created": "2025-02-07T16:29:38Z",
     "lastModified": "2025-02-07T21:44:41Z",
     "metaDataLastUpdated": "2025-02-07T21:45:22.738Z"
   },
-  "tags": [
-    "github-action",
-    "codejson"
-  ],
+  "tags": ["github-action", "codejson"],
   "contact": {
     "email": "opensource@cms.hhs.gov",
     "name": "CMS Open Source Team"
@@ -49,12 +37,8 @@
   "userInput": false,
   "fismaLevel": "Low",
   "group": "CMS/OA/DSAC",
-  "subsetInHealthcare": [
-    "Operational"
-  ],
-  "userType": [
-    "Government"
-  ],
+  "subsetInHealthcare": ["Operational"],
+  "userType": ["Government"],
   "repositoryHost": "github.com/DSACMS",
   "maturityModelTier": 3
 }

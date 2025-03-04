@@ -1,51 +1,53 @@
-import { CodeJSON } from './model.js'
-import * as helpers from './helper.js'
+import { CodeJSON } from "./model.js";
+import * as helpers from "./helper.js";
 
 const baselineCodeJSON: CodeJSON = {
-  name: '',
-  description: '',
-  longDescription: '',
-  status: '',
+  name: "",
+  description: "",
+  longDescription: "",
+  status: "",
   permissions: {
-    license: [{
-      name: '',
-      URL: ''
-    }],
-    usageType: '',
-    exemptionText: ''
+    license: [
+      {
+        name: "",
+        URL: "",
+      },
+    ],
+    usageType: "",
+    exemptionText: "",
   },
-  organization: '',
-  repositoryURL: '',
-  vcs: 'git',
+  organization: "",
+  repositoryURL: "",
+  vcs: "git",
   laborHours: 0,
   platforms: [],
   categories: [],
-  softwareType: '',
+  softwareType: "",
   languages: [],
-  maintenance: '',
+  maintenance: "",
   date: {
-    created: '',         
-    lastModified: '',      
-    metaDataLastUpdated: '' 
+    created: "",
+    lastModified: "",
+    metaDataLastUpdated: "",
   },
   tags: [],
   contact: {
-    email: '',
-    name: ''
+    email: "",
+    name: "",
   },
   localisation: false,
-  repositoryType: '',
+  repositoryType: "",
   userInput: false,
-  fismaLevel: '',
-  group: '',
+  fismaLevel: "",
+  group: "",
   subsetInHealthcare: [],
   userType: [],
-  repositoryHost: 'github',
-  maturityModelTier: 0
+  repositoryHost: "github",
+  maturityModelTier: 0,
 };
 
 async function getMetaData(): Promise<Partial<CodeJSON>> {
-  const partialCodeJSON = await helpers.calculateMetaData()
+  const partialCodeJSON = await helpers.calculateMetaData();
 
   return {
     name: partialCodeJSON.name,
@@ -56,31 +58,29 @@ async function getMetaData(): Promise<Partial<CodeJSON>> {
     date: {
       created: partialCodeJSON.date?.created ?? "",
       lastModified: partialCodeJSON.date?.lastModified ?? "",
-      metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString()
-    }
-  }
+      metaDataLastUpdated:
+        partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
+    },
+  };
 }
 
 export async function run(): Promise<void> {
-  const metaData = await getMetaData()
-  const currentCodeJSON = await helpers.readJSON("./code.json")
-  let finalCodeJSON = {} as CodeJSON
+  const metaData = await getMetaData();
+  const currentCodeJSON = await helpers.readJSON("./code.json");
+  let finalCodeJSON = {} as CodeJSON;
 
   if (currentCodeJSON) {
     finalCodeJSON = {
       ...baselineCodeJSON,
       ...currentCodeJSON,
-      ...metaData
-    }
+      ...metaData,
+    };
   } else {
     finalCodeJSON = {
       ...baselineCodeJSON,
-      ...metaData
-    }
+      ...metaData,
+    };
   }
 
-  helpers.sendPR(finalCodeJSON)
-  
+  helpers.sendPR(finalCodeJSON);
 }
-
-

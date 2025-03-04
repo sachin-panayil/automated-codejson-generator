@@ -9,6 +9,7 @@ The project is maintained by the DSACMS team. Current maintainers are listed in 
 ## Decision Making
 
 Decisions about the project are made through:
+
 - GitHub issues for feature discussions and bug reports
 - Pull requests for code changes
 - Maintainer review and approval
@@ -16,6 +17,7 @@ Decisions about the project are made through:
 ## Contributing
 
 Anyone can contribute to the project by:
+
 - Submitting issues
 - Submitting pull requests
 - Reviewing pull requests

@@ -1,33 +1,32 @@
-import * as core from '@actions/core'
-import * as fs from 'fs/promises';
+import * as core from "@actions/core";
+import * as fs from "fs/promises";
 
-import { Octokit as ActionKit } from '@octokit/action'
-import { createPullRequest } from "octokit-plugin-create-pull-request"
-import { exec } from 'child_process'
-import { promisify } from 'util';
+import { Octokit as ActionKit } from "@octokit/action";
+import { createPullRequest } from "octokit-plugin-create-pull-request";
+import { exec } from "child_process";
+import { promisify } from "util";
 
-import { CodeJSON, BasicRepoInfo} from './model.js'
+import { CodeJSON, BasicRepoInfo } from "./model.js";
 
 const execAsync = promisify(exec);
 
-const TOKEN = core.getInput("GITHUB_TOKEN", { required: true })
-const FEDERAL = core.getInput("FEDERAL", { required: false }) === 'true'
+const TOKEN = core.getInput("GITHUB_TOKEN", { required: true });
 
-const MyOctoKit = ActionKit.plugin(createPullRequest)
+const MyOctoKit = ActionKit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
   auth: TOKEN,
   log: {
     debug: core.debug,
     info: core.info,
     warn: core.warning,
-    error: core.error
-  }
+    error: core.error,
+  },
 });
 
-const owner = process.env.GITHUB_REPOSITORY_OWNER ?? ""
-const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] ?? ""
+const owner = process.env.GITHUB_REPOSITORY_OWNER ?? "";
+const repo = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "";
 
-const HOURS_PER_MONTH = 730.001
+const HOURS_PER_MONTH = 730.001;
 
 //===============================================
 // Meta Data
@@ -37,9 +36,9 @@ export async function calculateMetaData(): Promise<Partial<CodeJSON>> {
     const [laborHours, basicInfo, languages] = await Promise.all([
       getLaborHours(),
       getBasicInfo(),
-      getProgrammingLanguages()
-    ])
-    
+      getProgrammingLanguages(),
+    ]);
+
     return {
       name: basicInfo.title,
       description: basicInfo.description,
@@ -49,60 +48,59 @@ export async function calculateMetaData(): Promise<Partial<CodeJSON>> {
       date: {
         created: basicInfo.date.created,
         lastModified: basicInfo.date.lastModified,
-        metaDataLastUpdated: basicInfo.date.metaDataLastUpdated
-      }
-    }
-
+        metaDataLastUpdated: basicInfo.date.metaDataLastUpdated,
+      },
+    };
   } catch (error) {
-    core.error(`Failed to calculate meta data: ${error}`) 
-    throw error 
+    core.error(`Failed to calculate meta data: ${error}`);
+    throw error;
   }
 }
 
 async function getBasicInfo(): Promise<BasicRepoInfo> {
   try {
-    const repoData = await octokit.rest.repos.get({owner,repo})
+    const repoData = await octokit.rest.repos.get({ owner, repo });
 
     return {
       title: repoData.data.name,
       description: repoData.data.description ?? "",
       url: repoData.data.html_url,
       date: {
-        created: repoData.data.created_at,         
-        lastModified: repoData.data.updated_at,      
-        metaDataLastUpdated: new Date().toISOString()
-      }
-    }
-
+        created: repoData.data.created_at,
+        lastModified: repoData.data.updated_at,
+        metaDataLastUpdated: new Date().toISOString(),
+      },
+    };
   } catch (error) {
-    core.error(`Failed to get basic info: ${error}`)
-    throw error 
+    core.error(`Failed to get basic info: ${error}`);
+    throw error;
   }
-
 }
 
 async function getLaborHours(): Promise<number> {
   try {
-    const { stdout } = await execAsync(`scc . --format json2`)
-    const sccData = JSON.parse(stdout)
+    const { stdout } = await execAsync(`scc . --format json2`);
+    const sccData = JSON.parse(stdout);
 
-    const laborHours = Math.ceil(sccData["estimatedScheduleMonths"] * HOURS_PER_MONTH)
-    return laborHours
+    const laborHours = Math.ceil(
+      sccData["estimatedScheduleMonths"] * HOURS_PER_MONTH,
+    );
+    return laborHours;
   } catch (error) {
-    core.error(`Failed to get labor hours: ${error}`) 
-    throw error 
+    core.error(`Failed to get labor hours: ${error}`);
+    throw error;
   }
 }
 
 async function getProgrammingLanguages(): Promise<string[]> {
   try {
-    const repoData = await octokit.rest.repos.listLanguages({owner, repo})
-    const languages = Object.keys(repoData.data)
+    const repoData = await octokit.rest.repos.listLanguages({ owner, repo });
+    const languages = Object.keys(repoData.data);
 
-    return languages
+    return languages;
   } catch (error) {
-    core.error(`Failed to get languages: ${error}`)
-    throw error
+    core.error(`Failed to get languages: ${error}`);
+    throw error;
   }
 }
 
@@ -111,74 +109,62 @@ async function getProgrammingLanguages(): Promise<string[]> {
 //===============================================
 export async function readJSON(filepath: string): Promise<CodeJSON | null> {
   try {
-    const fileContent = await fs.readFile(filepath, 'utf8')
-    return JSON.parse(fileContent) as CodeJSON
+    const fileContent = await fs.readFile(filepath, "utf8");
+    return JSON.parse(fileContent) as CodeJSON;
   } catch (error) {
-    console.log(`Error with reading JSON file: ${error}`)
-    return null
+    console.log(`Error with reading JSON file: ${error}`);
+    return null;
   }
 }
 
 export async function sendPR(updatedCodeJSON: CodeJSON) {
-   try {
-    const formattedContent = JSON.stringify(updatedCodeJSON, null, 2)
-    const branchName = `code-json-${new Date().getTime()}`
+  try {
+    const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
+    const branchName = `code-json-${new Date().getTime()}`;
 
     const PR = await octokit.createPullRequest({
       owner,
       repo,
-      title: 'Update code.json',
-      body: bodyOfPR(FEDERAL),
-      base: 'main',
+      title: "Update code.json",
+      body: bodyOfPR(),
+      base: "main",
       head: branchName,
       labels: ["codejson-initialized"],
-      changes: [{
-        files: {
-          'code.json': formattedContent
+      changes: [
+        {
+          files: {
+            "code.json": formattedContent,
+          },
+          commit: "Update code.json metadata",
         },
-        commit: 'Update code.json metadata'
-      }]
-    });  
+      ],
+    });
 
     if (PR) {
-      core.info(`Successfully created PR: ${PR.data.html_url}`)
+      core.info(`Successfully created PR: ${PR.data.html_url}`);
     } else {
-      core.error(`Failed to create PR because of PR object`)
+      core.error(`Failed to create PR because of PR object`);
     }
-
   } catch (error) {
-    core.error(`Failed to create PR: ${error}`)
+    core.error(`Failed to create PR: ${error}`);
   }
 }
 
-function bodyOfPR(federal: boolean): string {
-  if (federal) {
-    return `
-    Hello, and thank you for your contributions to the Federal Open Source Community 🙏
+function bodyOfPR(): string {
+  return `
+    Hello, and thank you for your contributions to the Federal Open Source Community. 🙏
     \n \n
 
-    Pull requests adding [code.json repository metadata](https://github.com/DSACMS/gov-codejson/blob/main/docs/metadata.md) is being sent on behalf of the CMS Source Code Stewardship Taskforce(link?), in compliance with [The Federal Source Code Inventory Policy](https://code.gov/agency-compliance/compliance/inventory-code), [M-16-21](https://obamawhitehouse.archives.gov/sites/default/files/omb/memoranda/2016/m_16_21.pdf), and in preparation for the [SHARE IT Act of 2024](https://www.congress.gov/bill/118th-congress/house-bill/9566). If you have questions, you can reach out to the [CMS Open Source Program Office](opensource@cms.hhs.gov) or file an issue [here](https://github.com/DSACMS/automated-codejson-generator/issues).
+    This pull request adding [code.json repository metadata](https://github.com/DSACMS/gov-codejson/blob/main/docs/metadata.md) is being sent on behalf of the CMS Source Code Stewardship Taskforce, in compliance with [The Federal Source Code Inventory Policy](https://code.gov/agency-compliance/compliance/inventory-code), [M-16-21](https://obamawhitehouse.archives.gov/sites/default/files/omb/memoranda/2016/m_16_21.pdf), and in preparation for the [SHARE IT Act of 2024](https://www.congress.gov/bill/118th-congress/house-bill/9566). If you have questions, please file an issue [here](https://github.com/DSACMS/automated-codejson-generator/issues) or join our #cms-ospo slack channel [here](https://cmsgov.enterprise.slack.com/archives/C07HM92S9QQ).
     \n \n
 
     ## Next Steps
     ### Add Missing Information to code.json
-      - We have automatically calculated some fields but the majority require manual input
-      - Please enter the missing fields by directly editing code.json in Files Changed
-      - We also have a [formsite](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website.
-      - You can copy and paste your code.json from the website into here.
+      - We have automatically calculated some fields but many require manual input
+      - Please enter the missing fields by directly editing code.json in Files Changed tab on your pull-request
+      - We also have a [form](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website, and then download directly to your local machine, and then you can copy and paste into here.
     \n \n
 
-    If you would like additional information, please click this [link](https://github.com/DSACMS/gov-codejson).
-    `
-  } else {
-    return `
-    ## Next Steps
-    ### Add Missing Information to code.json
-      - We have automatically calculated some fields but the majority require manual input
-      - Please enter the missing fields by directly editing code.json in Files Changed
-      - We also have a [formsite](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website.
-      - You can copy and paste your code.json from the website into here.
-    `
-  }
-
+    If you would like additional information about the code.json metadata requirements, please visit the repository [here](https://github.com/DSACMS/gov-codejson).
+  `;
 }
