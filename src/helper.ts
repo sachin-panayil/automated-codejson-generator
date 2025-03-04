@@ -152,19 +152,18 @@ export async function sendPR(updatedCodeJSON: CodeJSON) {
 
 function bodyOfPR(): string {
   return `
-    Hello, and thank you for your contributions to the Federal Open Source Community. 🙏
-    \n \n
+  ## Welcome to the Federal Open Source Community!
 
-    This pull request adding [code.json repository metadata](https://github.com/DSACMS/gov-codejson/blob/main/docs/metadata.md) is being sent on behalf of the CMS Source Code Stewardship Taskforce, in compliance with [The Federal Source Code Inventory Policy](https://code.gov/agency-compliance/compliance/inventory-code), [M-16-21](https://obamawhitehouse.archives.gov/sites/default/files/omb/memoranda/2016/m_16_21.pdf), and in preparation for the [SHARE IT Act of 2024](https://www.congress.gov/bill/118th-congress/house-bill/9566). If you have questions, please file an issue [here](https://github.com/DSACMS/automated-codejson-generator/issues) or join our #cms-ospo slack channel [here](https://cmsgov.enterprise.slack.com/archives/C07HM92S9QQ).
-    \n \n
+  Hello, and thank you for your contributions to the Federal Open Source Community. 🙏
 
-    ## Next Steps
-    ### Add Missing Information to code.json
-      - We have automatically calculated some fields but many require manual input
-      - Please enter the missing fields by directly editing code.json in Files Changed tab on your pull-request
-      - We also have a [form](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website, and then download directly to your local machine, and then you can copy and paste into here.
-    \n \n
+  This pull request adding [code.json repository metadata](https://github.com/DSACMS/gov-codejson/blob/main/docs/metadata.md) is being sent on behalf of the CMS Source Code Stewardship Taskforce, in compliance with [The Federal Source Code Inventory Policy](https://code.gov/agency-compliance/compliance/inventory-code), [M-16-21](https://obamawhitehouse.archives.gov/sites/default/files/omb/memoranda/2016/m_16_21.pdf), and in preparation for the [SHARE IT Act of 2024](https://www.congress.gov/bill/118th-congress/house-bill/9566). If you have questions, please file an issue [here](https://github.com/DSACMS/automated-codejson-generator/issues) or join our #cms-ospo slack channel [here](https://cmsgov.enterprise.slack.com/archives/C07HM92S9QQ).
 
-    If you would like additional information about the code.json metadata requirements, please visit the repository [here](https://github.com/DSACMS/gov-codejson).
-  `;
+  ## Next Steps
+  ### Add Missing Information to code.json
+  - We have automatically calculated some fields but many require manual input
+  - Please enter the missing fields by directly editing code.json in Files Changed tab on your pull-request
+  - We also have a [form](https://dsacms.github.io/codejson-generator/) where you can create your code.json via a website, and then download directly to your local machine, and then you can copy and paste into here.
+
+  If you would like additional information about the code.json metadata requirements, please visit the repository [here](https://github.com/DSACMS/gov-codejson).
+  `
 }
