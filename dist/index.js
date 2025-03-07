@@ -58323,7 +58323,7 @@ async function sendPR(updatedCodeJSON) {
             repo,
             title: "Update code.json",
             body: bodyOfPR(),
-            base: "main",
+            base: "master",
             head: branchName,
             labels: ["codejson-initialized"],
             changes: [

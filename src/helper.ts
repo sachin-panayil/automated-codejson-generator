@@ -127,7 +127,7 @@ export async function sendPR(updatedCodeJSON: CodeJSON) {
       repo,
       title: "Update code.json",
       body: bodyOfPR(),
-      base: "main",
+      base: "master",
       head: branchName,
       labels: ["codejson-initialized"],
       changes: [
