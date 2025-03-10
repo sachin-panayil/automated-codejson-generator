@@ -7,6 +7,10 @@ inputs:
     description: "GitHub token used for API access"
     required: true
     default: ${{ github.token }}
+  BRANCH:
+    description: "Name of the branch the PR is sent to"
+    required: false
+    default: "main"
 
 outputs:
   updated:

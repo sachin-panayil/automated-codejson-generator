@@ -58218,6 +58218,7 @@ createPullRequest.VERSION = VERSION;
 
 const execAsync = promisify(exec$1);
 const TOKEN = coreExports.getInput("GITHUB_TOKEN", { required: true });
+const BRANCH = coreExports.getInput("BRANCH", { required: false });
 const MyOctoKit = Octokit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
     auth: TOKEN,
@@ -58323,7 +58324,7 @@ async function sendPR(updatedCodeJSON) {
             repo,
             title: "Update code.json",
             body: bodyOfPR(),
-            base: "master",
+            base: BRANCH,
             head: branchName,
             labels: ["codejson-initialized"],
             changes: [

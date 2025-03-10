@@ -11,6 +11,7 @@ import { CodeJSON, BasicRepoInfo } from "./model.js";
 const execAsync = promisify(exec);
 
 const TOKEN = core.getInput("GITHUB_TOKEN", { required: true });
+const BRANCH = core.getInput("BRANCH", { required: false });
 
 const MyOctoKit = ActionKit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
@@ -127,7 +128,7 @@ export async function sendPR(updatedCodeJSON: CodeJSON) {
       repo,
       title: "Update code.json",
       body: bodyOfPR(),
-      base: "master",
+      base: BRANCH,
       head: branchName,
       labels: ["codejson-initialized"],
       changes: [
