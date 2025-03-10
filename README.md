@@ -54,6 +54,7 @@ jobs:
         uses: DSACMS/automated-codejson-generator@main
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: "main"
 ```
 
 ## Project Vision
