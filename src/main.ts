@@ -83,8 +83,8 @@ export async function run(): Promise<void> {
 
   if (currentCodeJSON) {
     finalCodeJSON = {
-      ...baselineCodeJSON,
       ...currentCodeJSON,
+      ...baselineCodeJSON,
       ...metaData,
     };
   } else {
