@@ -58382,13 +58382,21 @@ const baselineCodeJSON = {
     },
     organization: "",
     repositoryURL: "",
+    projectURL: "",
+    repositoryHost: "github",
+    repositoryVisibility: "",
     vcs: "git",
     laborHours: 0,
+    reuseFrequency: {
+        forks: 0,
+        clones: 0,
+    },
     platforms: [],
     categories: [],
     softwareType: "",
     languages: [],
     maintenance: "",
+    contractNumber: "",
     date: {
         created: "",
         lastModified: "",
@@ -58399,14 +58407,17 @@ const baselineCodeJSON = {
         email: "",
         name: "",
     },
+    feedbackMechanisms: [],
     localisation: false,
     repositoryType: "",
     userInput: false,
     fismaLevel: "",
     group: "",
+    projects: [],
+    systems: [],
+    upstream: "",
     subsetInHealthcare: [],
     userType: [],
-    repositoryHost: "github",
     maturityModelTier: 0,
 };
 async function getMetaData() {
@@ -58422,6 +58433,7 @@ async function getMetaData() {
             lastModified: partialCodeJSON.date?.lastModified ?? "",
             metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
         },
+        feedbackMechanisms: [`${partialCodeJSON.repositoryURL}/issues`],
     };
 }
 async function run() {
@@ -58430,8 +58442,8 @@ async function run() {
     let finalCodeJSON = {};
     if (currentCodeJSON) {
         finalCodeJSON = {
-            ...baselineCodeJSON,
             ...currentCodeJSON,
+            ...baselineCodeJSON,
             ...metaData,
         };
     }

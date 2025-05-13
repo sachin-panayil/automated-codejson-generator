@@ -6,25 +6,37 @@ export interface CodeJSON {
     permissions: Permissions;
     organization: string;
     repositoryURL: string;
+    projectURL: string;
+    repositoryHost: string;
+    repositoryVisibility: string;
     vcs: string;
     laborHours: number;
+    reuseFrequency: ReuseFrequency;
     platforms: string[];
     categories: string[];
     softwareType: string;
     languages: string[];
     maintenance: string;
+    contractNumber: string;
     date: Date;
     tags: string[];
     contact: Contact;
+    feedbackMechanisms: string[];
     localisation: boolean;
     repositoryType: string;
     userInput: boolean;
     fismaLevel: string;
     group: string;
+    projects: string[];
+    systems: string[];
+    upstream: string;
     subsetInHealthcare: string[];
     userType: string[];
-    repositoryHost: string;
     maturityModelTier: number;
+}
+export interface ReuseFrequency {
+    forks: number;
+    clones: number;
 }
 export interface Permissions {
     license: License[];

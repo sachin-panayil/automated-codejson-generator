@@ -6,7 +6,7 @@ export interface CodeJSON {
   permissions: Permissions;
   organization: string;
   repositoryURL: string; // calculated
-  projectURL: string
+  projectURL: string;
   repositoryHost: string;
   repositoryVisibility: string;
   vcs: string;

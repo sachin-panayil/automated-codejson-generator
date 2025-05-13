@@ -72,7 +72,7 @@ async function getMetaData(): Promise<Partial<CodeJSON>> {
       metaDataLastUpdated:
         partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
     },
-    feedbackMechanisms: [`${partialCodeJSON.repositoryURL}/issues`]
+    feedbackMechanisms: [`${partialCodeJSON.repositoryURL}/issues`],
   };
 }
 
