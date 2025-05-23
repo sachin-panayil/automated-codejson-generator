@@ -58267,6 +58267,7 @@ async function getBasicInfo() {
             title: repoData.data.name,
             description: repoData.data.description ?? "",
             url: repoData.data.html_url,
+            repositoryVisibility: repoData.data.private ? "private" : "public",
             date: {
                 created: repoData.data.created_at,
                 lastModified: repoData.data.updated_at,
@@ -58442,8 +58443,8 @@ async function run() {
     let finalCodeJSON = {};
     if (currentCodeJSON) {
         finalCodeJSON = {
-            ...currentCodeJSON,
             ...baselineCodeJSON,
+            ...currentCodeJSON,
             ...metaData,
         };
     }
@@ -58453,7 +58454,7 @@ async function run() {
             ...metaData,
         };
     }
-    sendPR(finalCodeJSON);
+    await sendPR(finalCodeJSON);
 }
 
 /**

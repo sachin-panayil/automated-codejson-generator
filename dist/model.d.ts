@@ -61,4 +61,5 @@ export interface BasicRepoInfo {
     description: string;
     url: string;
     date: Date;
+    repositoryVisibility: string;
 }

@@ -83,8 +83,8 @@ export async function run(): Promise<void> {
 
   if (currentCodeJSON) {
     finalCodeJSON = {
-      ...currentCodeJSON,
       ...baselineCodeJSON,
+      ...currentCodeJSON,
       ...metaData,
     };
   } else {
@@ -94,5 +94,5 @@ export async function run(): Promise<void> {
     };
   }
 
-  helpers.sendPR(finalCodeJSON);
+  await helpers.sendPR(finalCodeJSON);
 }
