@@ -53,7 +53,8 @@
     "name": "CMS Open Source Team"
   },
   "feedbackMechanisms": [
-    "https://github.com/DSACMS/automated-codejson-generator/issues"
+    "https://github.com/DSACMS/automated-codejson-generator/issues",
+    "opensource@cms.hhs.gov"
   ],
   "localisation": false,
   "repositoryType": "tools",
