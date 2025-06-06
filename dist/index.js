@@ -58421,8 +58421,12 @@ const baselineCodeJSON = {
     userType: [],
     maturityModelTier: 0,
 };
-async function getMetaData() {
+async function getMetaData(existingCodeJSON) {
     const partialCodeJSON = await calculateMetaData();
+    const existingMechanisms = existingCodeJSON?.feedbackMechanisms || [];
+    const feedbackMechanisms = existingMechanisms.length > 0
+        ? existingMechanisms
+        : [`${partialCodeJSON.repositoryURL}/issues`];
     return {
         name: partialCodeJSON.name,
         description: partialCodeJSON.description,
@@ -58434,12 +58438,12 @@ async function getMetaData() {
             lastModified: partialCodeJSON.date?.lastModified ?? "",
             metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
         },
-        feedbackMechanisms: [`${partialCodeJSON.repositoryURL}/issues`],
+        feedbackMechanisms,
     };
 }
 async function run() {
-    const metaData = await getMetaData();
     const currentCodeJSON = await readJSON("./code.json");
+    const metaData = await getMetaData(currentCodeJSON);
     let finalCodeJSON = {};
     if (currentCodeJSON) {
         finalCodeJSON = {

@@ -57,8 +57,16 @@ const baselineCodeJSON: CodeJSON = {
   maturityModelTier: 0,
 };
 
-async function getMetaData(): Promise<Partial<CodeJSON>> {
+async function getMetaData(
+  existingCodeJSON?: CodeJSON | null,
+): Promise<Partial<CodeJSON>> {
   const partialCodeJSON = await helpers.calculateMetaData();
+
+  const existingMechanisms = existingCodeJSON?.feedbackMechanisms || [];
+  const feedbackMechanisms =
+    existingMechanisms.length > 0
+      ? existingMechanisms
+      : [`${partialCodeJSON.repositoryURL}/issues`];
 
   return {
     name: partialCodeJSON.name,
@@ -72,13 +80,13 @@ async function getMetaData(): Promise<Partial<CodeJSON>> {
       metaDataLastUpdated:
         partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
     },
-    feedbackMechanisms: [`${partialCodeJSON.repositoryURL}/issues`],
+    feedbackMechanisms,
   };
 }
 
 export async function run(): Promise<void> {
-  const metaData = await getMetaData();
   const currentCodeJSON = await helpers.readJSON("./code.json");
+  const metaData = await getMetaData(currentCodeJSON);
   let finalCodeJSON = {} as CodeJSON;
 
   if (currentCodeJSON) {
