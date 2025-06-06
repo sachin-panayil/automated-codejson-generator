@@ -32,4 +32,4 @@ jobs:
         uses: ./
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: "repolinter-results-#1"
+          BRANCH: "main"
