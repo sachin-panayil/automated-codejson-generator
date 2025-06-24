@@ -27,6 +27,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   update-code-json:
@@ -37,21 +38,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-
-      - name: Install SCC
-        run: go install github.com/boyter/scc/v3@latest
-
       - name: Update code.json
-        uses: DSACMS/automated-codejson-generator@main
+        uses: DSACMS/automated-codejson-generator@v1.0.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: "main"
