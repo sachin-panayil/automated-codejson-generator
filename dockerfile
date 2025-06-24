@@ -9,9 +9,7 @@ WORKDIR /action
 COPY package*.json ./
 RUN npm ci
 
-COPY src ./src
-COPY tsconfig.json ./
-COPY rollup.config.ts ./ 
+COPY . .
 
 RUN npm run bundle
 
