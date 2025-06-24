@@ -7,7 +7,7 @@ RUN go install github.com/boyter/scc/v3@latest
 WORKDIR /action
 
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 COPY src ./src
 COPY tsconfig.json ./
