@@ -24,19 +24,10 @@
     "forks": 0,
     "clones": 0
   },
-  "platforms": [
-    "web",
-    "linux"
-  ],
-  "categories": [
-    "developer-tools",
-    "automation"
-  ],
+  "platforms": ["web", "linux"],
+  "categories": ["developer-tools", "automation"],
   "softwareType": "standalone/backend",
-  "languages": [
-    "TypeScript",
-    "JavaScript"
-  ],
+  "languages": ["TypeScript", "JavaScript"],
   "maintenance": "internal",
   "contractNumber": "",
   "date": {
@@ -44,10 +35,7 @@
     "lastModified": "2025-06-06T17:48:49Z",
     "metaDataLastUpdated": "2025-06-06T17:49:37.841Z"
   },
-  "tags": [
-    "github-action",
-    "codejson"
-  ],
+  "tags": ["github-action", "codejson"],
   "contact": {
     "email": "opensource@cms.hhs.gov",
     "name": "CMS Open Source Team"
@@ -63,11 +51,7 @@
   "projects": [],
   "systems": [],
   "upstream": "",
-  "subsetInHealthcare": [
-    "Operational"
-  ],
-  "userType": [
-    "Government"
-  ],
+  "subsetInHealthcare": ["Operational"],
+  "userType": ["Government"],
   "maturityModelTier": 3
 }

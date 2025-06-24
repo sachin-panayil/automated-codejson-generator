@@ -85,7 +85,7 @@ async function getMetaData(
 }
 
 export async function run(): Promise<void> {
-  const currentCodeJSON = await helpers.readJSON("./code.json");
+  const currentCodeJSON = await helpers.readJSON("/github/workspace/code.json");
   const metaData = await getMetaData(currentCodeJSON);
   let finalCodeJSON = {} as CodeJSON;
 

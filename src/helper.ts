@@ -81,7 +81,7 @@ async function getBasicInfo(): Promise<BasicRepoInfo> {
 
 async function getLaborHours(): Promise<number> {
   try {
-    const { stdout } = await execAsync(`scc . --format json2`);
+    const { stdout } = await execAsync(`scc /github/workspace --format json2`);
     const sccData = JSON.parse(stdout);
 
     const laborHours = Math.ceil(
