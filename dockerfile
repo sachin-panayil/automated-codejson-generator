@@ -11,6 +11,7 @@ RUN npm ci
 
 COPY src ./src
 COPY tsconfig.json ./
+COPY rollup.config.ts ./ 
 
 RUN npm run bundle
 
