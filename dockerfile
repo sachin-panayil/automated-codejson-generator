@@ -12,7 +12,7 @@ RUN npm ci --only=production
 COPY src ./src
 COPY tsconfig.json ./
 
-RUN npm run build
+RUN npm run bundle
 
 ENV PATH="/root/go/bin:${PATH}"
 
