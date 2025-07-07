@@ -58282,7 +58282,7 @@ async function getBasicInfo() {
 }
 async function getLaborHours() {
     try {
-        const { stdout } = await execAsync(`scc . --format json2`);
+        const { stdout } = await execAsync(`scc /github/workspace --format json2`);
         const sccData = JSON.parse(stdout);
         const laborHours = Math.ceil(sccData["estimatedScheduleMonths"] * HOURS_PER_MONTH);
         return laborHours;
@@ -58339,6 +58339,8 @@ async function sendPR(updatedCodeJSON) {
         });
         if (PR) {
             coreExports.info(`Successfully created PR: ${PR.data.html_url}`);
+            coreExports.setOutput("updated", PR);
+            coreExports.setOutput("pr_url", PR.data.html_url);
         }
         else {
             coreExports.error(`Failed to create PR because of PR object`);
@@ -58442,7 +58444,7 @@ async function getMetaData(existingCodeJSON) {
     };
 }
 async function run() {
-    const currentCodeJSON = await readJSON("./code.json");
+    const currentCodeJSON = await readJSON("/github/workspace/code.json");
     const metaData = await getMetaData(currentCodeJSON);
     let finalCodeJSON = {};
     if (currentCodeJSON) {

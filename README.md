@@ -15,13 +15,23 @@ GITHUB_TOKEN:
   default: ${{ github.token }}
 ```
 
-## Usage
+## Outputs
+
+```yaml
+updated:
+  description: "Boolean indicating whether code.json was updated"
+pr_url:
+  description: "URL of the created pull request if changes were made"
+```
+
+## Workflow Examples
 
 ### Create a PR to add compliant code.json
 
 ```yaml
 name: Update Code.json
 on:
+  schedule: 0 0 1 * * # Example of running first day of every month
   workflow_dispatch:
 
 permissions:
@@ -44,6 +54,29 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: "main"
 ```
+
+## Generation Context
+The automated code.json generator calculates specific fields by analyzing your repository and using GitHub's API. Here's what gets generated and what your repository needs for successful generation.
+
+**name**: This field pulls directly from your repository's name as configured in GitHub. No configuration needed.
+
+**description**: The generator extracts this from your repository's description field in GitHub settings. *Make sure you've added a description to your repository through GitHub's interface for this field to populate properly.*
+
+**repositoryURL**: This automatically uses your repository's public GitHub URL. No configuration needed.
+
+**repositoryVisibility**: The generator determines whether your repository is private or public. No configuration needed.
+
+**laborHours**: The generator runs SCC against your workspace to analyze your codebase and estimate development time. No configuration needed.
+
+**languages**: This field populates the programming languages in your repository. No configuration needed.
+
+**dateCreated**: The generator pulls your repository's creation date. No configuration needed.
+
+**dateLastModified**: This uses your repository's last update timestamp, reflecting the most recent changes. No configuration needed.
+
+**dateMetaDataLastUpdated**: The generator sets this to the current timestamp each time it runs, providing a record of when the metadata was last refreshed. No configuration needed.
+
+**feedbackMechanisms**: A list of containing your repository's issues URL in the format of {repositoryURL}/issues. If you already have a code.json file with existing feedback mechanisms, the generator preserves those values. No configuration needed.
 
 ## Project Vision
 
@@ -100,7 +133,7 @@ To develop locally:
 1. Clone the repository
 2. Install dependencies with `npm install`
 3. Install Go and SCC tool: `go install github.com/boyter/scc/v3@latest`
-4. Build the project with `npm run package`
+4. Build the project with `npm run bundle`
 5. Run tests with `npm test`
 
 ## Coding Style and Linters
