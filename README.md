@@ -31,7 +31,8 @@ pr_url:
 ```yaml
 name: Update Code.json
 on:
-  schedule: 0 0 1 * * # Example of running first day of every month
+  schedule: 
+    - cron: 0 0 1 * * # First day of every month
   workflow_dispatch:
 
 permissions:
