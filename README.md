@@ -53,7 +53,7 @@ jobs:
         uses: DSACMS/automated-codejson-generator@v1.0.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: "main"
+          BRANCH: "main" # Make sure this is the name of your default branch!
 ```
 
 ## Generation Context
