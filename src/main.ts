@@ -102,5 +102,6 @@ export async function run(): Promise<void> {
     };
   }
 
-  await helpers.sendPR(finalCodeJSON);
+  const baseBranchName = await helpers.getBaseBranch();
+  await helpers.sendPR(finalCodeJSON, baseBranchName);
 }

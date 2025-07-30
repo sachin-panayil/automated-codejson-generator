@@ -58218,7 +58218,6 @@ createPullRequest.VERSION = VERSION;
 
 const execAsync = promisify(exec$1);
 const TOKEN = coreExports.getInput("GITHUB_TOKEN", { required: true });
-const BRANCH = coreExports.getInput("BRANCH", { required: false });
 const MyOctoKit = Octokit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
     auth: TOKEN,
@@ -58303,6 +58302,22 @@ async function getProgrammingLanguages() {
         throw error;
     }
 }
+async function getBaseBranch() {
+    const BRANCH = coreExports.getInput("BRANCH", { required: false });
+    if (BRANCH) {
+        return BRANCH;
+    }
+    else {
+        try {
+            const repoData = await octokit.rest.repos.get({ owner, repo });
+            return repoData.data.default_branch;
+        }
+        catch (error) {
+            coreExports.error(`Failed to get Base Branch Name: ${error}`);
+            throw error;
+        }
+    }
+}
 //===============================================
 // Data Handling
 //===============================================
@@ -58316,17 +58331,17 @@ async function readJSON(filepath) {
         return null;
     }
 }
-async function sendPR(updatedCodeJSON) {
+async function sendPR(updatedCodeJSON, baseBranchName) {
     try {
         const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
-        const branchName = `code-json-${new Date().getTime()}`;
+        const headBranchName = `code-json-${new Date().getTime()}`;
         const PR = await octokit.createPullRequest({
             owner,
             repo,
             title: "Update code.json",
             body: bodyOfPR(),
-            base: BRANCH,
-            head: branchName,
+            base: baseBranchName,
+            head: headBranchName,
             labels: ["codejson-initialized"],
             changes: [
                 {
@@ -58460,7 +58475,8 @@ async function run() {
             ...metaData,
         };
     }
-    await sendPR(finalCodeJSON);
+    const baseBranchName = await getBaseBranch();
+    await sendPR(finalCodeJSON, baseBranchName);
 }
 
 /**

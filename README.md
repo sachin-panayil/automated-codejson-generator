@@ -31,7 +31,7 @@ pr_url:
 ```yaml
 name: Update Code.json
 on:
-  schedule: 
+  schedule:
     - cron: 0 0 1 * * # First day of every month
   workflow_dispatch:
 
@@ -57,11 +57,12 @@ jobs:
 ```
 
 ## Generation Context
+
 The automated code.json generator calculates specific fields by analyzing your repository and using GitHub's API. Here's what gets generated and what your repository needs for successful generation.
 
 **name**: This field pulls directly from your repository's name as configured in GitHub. No configuration needed.
 
-**description**: The generator extracts this from your repository's description field in GitHub settings. *Make sure you've added a description to your repository through GitHub's interface for this field to populate properly.*
+**description**: The generator extracts this from your repository's description field in GitHub settings. _Make sure you've added a description to your repository through GitHub's interface for this field to populate properly._
 
 **repositoryURL**: This automatically uses your repository's public GitHub URL. No configuration needed.
 

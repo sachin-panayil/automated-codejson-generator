@@ -11,7 +11,6 @@ import { CodeJSON, BasicRepoInfo } from "./model.js";
 const execAsync = promisify(exec);
 
 const TOKEN = core.getInput("GITHUB_TOKEN", { required: true });
-const BRANCH = core.getInput("BRANCH", { required: false });
 
 const MyOctoKit = ActionKit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
@@ -106,6 +105,22 @@ async function getProgrammingLanguages(): Promise<string[]> {
   }
 }
 
+export async function getBaseBranch(): Promise<string> {
+  const BRANCH = core.getInput("BRANCH", { required: false });
+
+  if (BRANCH) {
+    return BRANCH;
+  } else {
+    try {
+      const repoData = await octokit.rest.repos.get({ owner, repo });
+      return repoData.data.default_branch;
+    } catch (error) {
+      core.error(`Failed to get Base Branch Name: ${error}`);
+      throw error;
+    }
+  }
+}
+
 //===============================================
 // Data Handling
 //===============================================
@@ -119,18 +134,21 @@ export async function readJSON(filepath: string): Promise<CodeJSON | null> {
   }
 }
 
-export async function sendPR(updatedCodeJSON: CodeJSON) {
+export async function sendPR(
+  updatedCodeJSON: CodeJSON,
+  baseBranchName: string,
+) {
   try {
     const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
-    const branchName = `code-json-${new Date().getTime()}`;
+    const headBranchName = `code-json-${new Date().getTime()}`;
 
     const PR = await octokit.createPullRequest({
       owner,
       repo,
       title: "Update code.json",
       body: bodyOfPR(),
-      base: BRANCH,
-      head: branchName,
+      base: baseBranchName,
+      head: headBranchName,
       labels: ["codejson-initialized"],
       changes: [
         {
