@@ -58444,9 +58444,14 @@ async function getMetaData(existingCodeJSON) {
     const feedbackMechanisms = existingMechanisms.length > 0
         ? existingMechanisms
         : [`${partialCodeJSON.repositoryURL}/issues`];
+    // only use the description if its not empty in the About section on GitHub, else preserve existing
+    const shouldUpdateDescription = partialCodeJSON.description && partialCodeJSON.description.trim() !== "";
+    const description = shouldUpdateDescription
+        ? partialCodeJSON.description
+        : existingCodeJSON?.description || "";
     return {
         name: partialCodeJSON.name,
-        description: partialCodeJSON.description,
+        description: description,
         repositoryURL: partialCodeJSON.repositoryURL,
         laborHours: partialCodeJSON?.laborHours,
         languages: partialCodeJSON.languages,
