@@ -58236,17 +58236,22 @@ const HOURS_PER_MONTH = 730.001;
 //===============================================
 async function calculateMetaData() {
     try {
-        const [laborHours, basicInfo, languages] = await Promise.all([
+        const [laborHours, basicInfo] = await Promise.all([
             getLaborHours(),
             getBasicInfo(),
-            getProgrammingLanguages(),
         ]);
         return {
             name: basicInfo.title,
             description: basicInfo.description,
             repositoryURL: basicInfo.url,
+            repositoryVisibility: basicInfo.repositoryVisibility,
             laborHours: laborHours,
-            languages: languages,
+            languages: basicInfo.languages,
+            reuseFrequency: {
+                forks: basicInfo.forks,
+                clones: 0,
+            },
+            tags: basicInfo.tags,
             date: {
                 created: basicInfo.date.created,
                 lastModified: basicInfo.date.lastModified,
@@ -58261,12 +58266,21 @@ async function calculateMetaData() {
 }
 async function getBasicInfo() {
     try {
-        const repoData = await octokit.rest.repos.get({ owner, repo });
+        const [repoData, languagesData] = await Promise.all([
+            octokit.rest.repos.get({ owner, repo }),
+            octokit.rest.repos.listLanguages({ owner, repo }),
+        ]);
+        const languages = Object.keys(languagesData.data);
+        const topics = repoData.data.topics || [];
+        const tags = topics.filter((topic) => typeof topic === "string" && topic.trim() !== "");
         return {
             title: repoData.data.name,
             description: repoData.data.description ?? "",
             url: repoData.data.html_url,
             repositoryVisibility: repoData.data.private ? "private" : "public",
+            languages: languages,
+            forks: repoData.data.forks_count,
+            tags: tags,
             date: {
                 created: repoData.data.created_at,
                 lastModified: repoData.data.updated_at,
@@ -58288,17 +58302,6 @@ async function getLaborHours() {
     }
     catch (error) {
         coreExports.error(`Failed to get labor hours: ${error}`);
-        throw error;
-    }
-}
-async function getProgrammingLanguages() {
-    try {
-        const repoData = await octokit.rest.repos.listLanguages({ owner, repo });
-        const languages = Object.keys(repoData.data);
-        return languages;
-    }
-    catch (error) {
-        coreExports.error(`Failed to get languages: ${error}`);
         throw error;
     }
 }
@@ -58440,16 +58443,33 @@ const baselineCodeJSON = {
 };
 async function getMetaData(existingCodeJSON) {
     const partialCodeJSON = await calculateMetaData();
+    // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
     const existingMechanisms = existingCodeJSON?.feedbackMechanisms || [];
     const feedbackMechanisms = existingMechanisms.length > 0
         ? existingMechanisms
         : [`${partialCodeJSON.repositoryURL}/issues`];
+    // only use the calculated description if its not empty, otherwise keep existing
+    const shouldUpdateDescription = partialCodeJSON.description && partialCodeJSON.description.trim() !== "";
+    const description = shouldUpdateDescription
+        ? partialCodeJSON.description
+        : existingCodeJSON?.description || "";
+    // only update tags if we have new ones from GitHub Topics, otherwise keep existing
+    const shouldUpdateTags = partialCodeJSON.tags && partialCodeJSON.tags.length > 0;
+    const tags = shouldUpdateTags
+        ? partialCodeJSON.tags
+        : existingCodeJSON?.tags || [];
     return {
         name: partialCodeJSON.name,
-        description: partialCodeJSON.description,
+        description: description,
         repositoryURL: partialCodeJSON.repositoryURL,
-        laborHours: partialCodeJSON?.laborHours,
+        repositoryVisibility: partialCodeJSON.repositoryVisibility,
+        laborHours: partialCodeJSON.laborHours,
         languages: partialCodeJSON.languages,
+        reuseFrequency: {
+            forks: partialCodeJSON.reuseFrequency?.forks ?? 0,
+            clones: existingCodeJSON?.reuseFrequency?.clones ?? 0,
+        },
+        tags: tags,
         date: {
             created: partialCodeJSON.date?.created ?? "",
             lastModified: partialCodeJSON.date?.lastModified ?? "",
