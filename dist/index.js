@@ -58218,7 +58218,6 @@ createPullRequest.VERSION = VERSION;
 
 const execAsync = promisify(exec$1);
 const TOKEN = coreExports.getInput("GITHUB_TOKEN", { required: true });
-const BRANCH = coreExports.getInput("BRANCH", { required: false });
 const MyOctoKit = Octokit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
     auth: TOKEN,
@@ -58237,17 +58236,22 @@ const HOURS_PER_MONTH = 730.001;
 //===============================================
 async function calculateMetaData() {
     try {
-        const [laborHours, basicInfo, languages] = await Promise.all([
+        const [laborHours, basicInfo] = await Promise.all([
             getLaborHours(),
             getBasicInfo(),
-            getProgrammingLanguages(),
         ]);
         return {
             name: basicInfo.title,
             description: basicInfo.description,
             repositoryURL: basicInfo.url,
+            repositoryVisibility: basicInfo.repositoryVisibility,
             laborHours: laborHours,
-            languages: languages,
+            languages: basicInfo.languages,
+            reuseFrequency: {
+                forks: basicInfo.forks,
+                clones: 0,
+            },
+            tags: basicInfo.tags,
             date: {
                 created: basicInfo.date.created,
                 lastModified: basicInfo.date.lastModified,
@@ -58262,12 +58266,21 @@ async function calculateMetaData() {
 }
 async function getBasicInfo() {
     try {
-        const repoData = await octokit.rest.repos.get({ owner, repo });
+        const [repoData, languagesData] = await Promise.all([
+            octokit.rest.repos.get({ owner, repo }),
+            octokit.rest.repos.listLanguages({ owner, repo }),
+        ]);
+        const languages = Object.keys(languagesData.data);
+        const topics = repoData.data.topics || [];
+        const tags = topics.filter((topic) => typeof topic === "string" && topic.trim() !== "");
         return {
             title: repoData.data.name,
             description: repoData.data.description ?? "",
             url: repoData.data.html_url,
             repositoryVisibility: repoData.data.private ? "private" : "public",
+            languages: languages,
+            forks: repoData.data.forks_count,
+            tags: tags,
             date: {
                 created: repoData.data.created_at,
                 lastModified: repoData.data.updated_at,
@@ -58292,15 +58305,20 @@ async function getLaborHours() {
         throw error;
     }
 }
-async function getProgrammingLanguages() {
-    try {
-        const repoData = await octokit.rest.repos.listLanguages({ owner, repo });
-        const languages = Object.keys(repoData.data);
-        return languages;
+async function getBaseBranch() {
+    const BRANCH = coreExports.getInput("BRANCH", { required: false });
+    if (BRANCH) {
+        return BRANCH;
     }
-    catch (error) {
-        coreExports.error(`Failed to get languages: ${error}`);
-        throw error;
+    else {
+        try {
+            const repoData = await octokit.rest.repos.get({ owner, repo });
+            return repoData.data.default_branch;
+        }
+        catch (error) {
+            coreExports.error(`Failed to get Base Branch Name: ${error}`);
+            throw error;
+        }
     }
 }
 //===============================================
@@ -58316,17 +58334,17 @@ async function readJSON(filepath) {
         return null;
     }
 }
-async function sendPR(updatedCodeJSON) {
+async function sendPR(updatedCodeJSON, baseBranchName) {
     try {
         const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
-        const branchName = `code-json-${new Date().getTime()}`;
+        const headBranchName = `code-json-${new Date().getTime()}`;
         const PR = await octokit.createPullRequest({
             owner,
             repo,
             title: "Update code.json",
             body: bodyOfPR(),
-            base: BRANCH,
-            head: branchName,
+            base: baseBranchName,
+            head: headBranchName,
             labels: ["codejson-initialized"],
             changes: [
                 {
@@ -58339,11 +58357,12 @@ async function sendPR(updatedCodeJSON) {
         });
         if (PR) {
             coreExports.info(`Successfully created PR: ${PR.data.html_url}`);
-            coreExports.setOutput("updated", PR);
+            coreExports.setOutput("updated", true);
             coreExports.setOutput("pr_url", PR.data.html_url);
         }
         else {
             coreExports.error(`Failed to create PR because of PR object`);
+            coreExports.setOutput("updated", false);
         }
     }
     catch (error) {
@@ -58425,16 +58444,33 @@ const baselineCodeJSON = {
 };
 async function getMetaData(existingCodeJSON) {
     const partialCodeJSON = await calculateMetaData();
+    // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
     const existingMechanisms = existingCodeJSON?.feedbackMechanisms || [];
     const feedbackMechanisms = existingMechanisms.length > 0
         ? existingMechanisms
         : [`${partialCodeJSON.repositoryURL}/issues`];
+    // only use the calculated description if its not empty, otherwise keep existing
+    const shouldUpdateDescription = partialCodeJSON.description && partialCodeJSON.description.trim() !== "";
+    const description = shouldUpdateDescription
+        ? partialCodeJSON.description
+        : existingCodeJSON?.description || "";
+    // only update tags if we have new ones from GitHub Topics, otherwise keep existing
+    const shouldUpdateTags = partialCodeJSON.tags && partialCodeJSON.tags.length > 0;
+    const tags = shouldUpdateTags
+        ? partialCodeJSON.tags
+        : existingCodeJSON?.tags || [];
     return {
         name: partialCodeJSON.name,
-        description: partialCodeJSON.description,
+        description: description,
         repositoryURL: partialCodeJSON.repositoryURL,
-        laborHours: partialCodeJSON?.laborHours,
+        repositoryVisibility: partialCodeJSON.repositoryVisibility,
+        laborHours: partialCodeJSON.laborHours,
         languages: partialCodeJSON.languages,
+        reuseFrequency: {
+            forks: partialCodeJSON.reuseFrequency?.forks ?? 0,
+            clones: existingCodeJSON?.reuseFrequency?.clones ?? 0,
+        },
+        tags: tags,
         date: {
             created: partialCodeJSON.date?.created ?? "",
             lastModified: partialCodeJSON.date?.lastModified ?? "",
@@ -58460,7 +58496,8 @@ async function run() {
             ...metaData,
         };
     }
-    await sendPR(finalCodeJSON);
+    const baseBranchName = await getBaseBranch();
+    await sendPR(finalCodeJSON, baseBranchName);
 }
 
 /**

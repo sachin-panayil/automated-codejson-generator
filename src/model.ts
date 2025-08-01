@@ -8,10 +8,10 @@ export interface CodeJSON {
   repositoryURL: string; // calculated
   projectURL: string;
   repositoryHost: string;
-  repositoryVisibility: string;
+  repositoryVisibility: string; // calculated
   vcs: string;
   laborHours: number; // calculated
-  reuseFrequency: ReuseFrequency;
+  reuseFrequency: ReuseFrequency; // semi-calculated
   platforms: string[];
   categories: string[];
   softwareType: string;
@@ -19,9 +19,9 @@ export interface CodeJSON {
   maintenance: string;
   contractNumber: string;
   date: Date; // calculated
-  tags: string[];
+  tags: string[]; // calculated
   contact: Contact;
-  feedbackMechanisms: string[];
+  feedbackMechanisms: string[]; // semi-calculated
   localisation: boolean;
   repositoryType: string;
   userInput: boolean;
@@ -37,7 +37,7 @@ export interface CodeJSON {
 
 export interface ReuseFrequency {
   forks: number;
-  clones: number;
+  clones: number | undefined;
 }
 
 export interface Permissions {
@@ -66,6 +66,9 @@ export interface BasicRepoInfo {
   title: string;
   description: string;
   url: string;
-  date: Date;
   repositoryVisibility: string;
+  languages: string[];
+  forks: number;
+  tags: string[];
+  date: Date;
 }

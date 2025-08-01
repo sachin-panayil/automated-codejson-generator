@@ -11,7 +11,6 @@ import { CodeJSON, BasicRepoInfo } from "./model.js";
 const execAsync = promisify(exec);
 
 const TOKEN = core.getInput("GITHUB_TOKEN", { required: true });
-const BRANCH = core.getInput("BRANCH", { required: false });
 
 const MyOctoKit = ActionKit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
@@ -34,18 +33,23 @@ const HOURS_PER_MONTH = 730.001;
 //===============================================
 export async function calculateMetaData(): Promise<Partial<CodeJSON>> {
   try {
-    const [laborHours, basicInfo, languages] = await Promise.all([
+    const [laborHours, basicInfo] = await Promise.all([
       getLaborHours(),
       getBasicInfo(),
-      getProgrammingLanguages(),
     ]);
 
     return {
       name: basicInfo.title,
       description: basicInfo.description,
       repositoryURL: basicInfo.url,
+      repositoryVisibility: basicInfo.repositoryVisibility,
       laborHours: laborHours,
-      languages: languages,
+      languages: basicInfo.languages,
+      reuseFrequency: {
+        forks: basicInfo.forks,
+        clones: 0,
+      },
+      tags: basicInfo.tags,
       date: {
         created: basicInfo.date.created,
         lastModified: basicInfo.date.lastModified,
@@ -60,13 +64,25 @@ export async function calculateMetaData(): Promise<Partial<CodeJSON>> {
 
 async function getBasicInfo(): Promise<BasicRepoInfo> {
   try {
-    const repoData = await octokit.rest.repos.get({ owner, repo });
+    const [repoData, languagesData] = await Promise.all([
+      octokit.rest.repos.get({ owner, repo }),
+      octokit.rest.repos.listLanguages({ owner, repo }),
+    ]);
+
+    const languages = Object.keys(languagesData.data);
+    const topics = repoData.data.topics || [];
+    const tags = topics.filter(
+      (topic) => typeof topic === "string" && topic.trim() !== "",
+    );
 
     return {
       title: repoData.data.name,
       description: repoData.data.description ?? "",
       url: repoData.data.html_url,
       repositoryVisibility: repoData.data.private ? "private" : "public",
+      languages: languages,
+      forks: repoData.data.forks_count,
+      tags: tags,
       date: {
         created: repoData.data.created_at,
         lastModified: repoData.data.updated_at,
@@ -94,15 +110,19 @@ async function getLaborHours(): Promise<number> {
   }
 }
 
-async function getProgrammingLanguages(): Promise<string[]> {
-  try {
-    const repoData = await octokit.rest.repos.listLanguages({ owner, repo });
-    const languages = Object.keys(repoData.data);
+export async function getBaseBranch(): Promise<string> {
+  const BRANCH = core.getInput("BRANCH", { required: false });
 
-    return languages;
-  } catch (error) {
-    core.error(`Failed to get languages: ${error}`);
-    throw error;
+  if (BRANCH) {
+    return BRANCH;
+  } else {
+    try {
+      const repoData = await octokit.rest.repos.get({ owner, repo });
+      return repoData.data.default_branch;
+    } catch (error) {
+      core.error(`Failed to get Base Branch Name: ${error}`);
+      throw error;
+    }
   }
 }
 
@@ -119,18 +139,21 @@ export async function readJSON(filepath: string): Promise<CodeJSON | null> {
   }
 }
 
-export async function sendPR(updatedCodeJSON: CodeJSON) {
+export async function sendPR(
+  updatedCodeJSON: CodeJSON,
+  baseBranchName: string,
+) {
   try {
     const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
-    const branchName = `code-json-${new Date().getTime()}`;
+    const headBranchName = `code-json-${new Date().getTime()}`;
 
     const PR = await octokit.createPullRequest({
       owner,
       repo,
       title: "Update code.json",
       body: bodyOfPR(),
-      base: BRANCH,
-      head: branchName,
+      base: baseBranchName,
+      head: headBranchName,
       labels: ["codejson-initialized"],
       changes: [
         {
@@ -145,10 +168,11 @@ export async function sendPR(updatedCodeJSON: CodeJSON) {
     if (PR) {
       core.info(`Successfully created PR: ${PR.data.html_url}`);
 
-      core.setOutput("updated", PR);
+      core.setOutput("updated", true);
       core.setOutput("pr_url", PR.data.html_url);
     } else {
       core.error(`Failed to create PR because of PR object`);
+      core.setOutput("updated", false);
     }
   } catch (error) {
     core.error(`Failed to create PR: ${error}`);

@@ -62,18 +62,39 @@ async function getMetaData(
 ): Promise<Partial<CodeJSON>> {
   const partialCodeJSON = await helpers.calculateMetaData();
 
+  // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
   const existingMechanisms = existingCodeJSON?.feedbackMechanisms || [];
   const feedbackMechanisms =
     existingMechanisms.length > 0
       ? existingMechanisms
       : [`${partialCodeJSON.repositoryURL}/issues`];
 
+  // only use the calculated description if its not empty, otherwise keep existing
+  const shouldUpdateDescription =
+    partialCodeJSON.description && partialCodeJSON.description.trim() !== "";
+  const description = shouldUpdateDescription
+    ? partialCodeJSON.description
+    : existingCodeJSON?.description || "";
+
+  // only update tags if we have new ones from GitHub Topics, otherwise keep existing
+  const shouldUpdateTags =
+    partialCodeJSON.tags && partialCodeJSON.tags.length > 0;
+  const tags = shouldUpdateTags
+    ? partialCodeJSON.tags
+    : existingCodeJSON?.tags || [];
+
   return {
     name: partialCodeJSON.name,
-    description: partialCodeJSON.description,
+    description: description,
     repositoryURL: partialCodeJSON.repositoryURL,
-    laborHours: partialCodeJSON?.laborHours,
+    repositoryVisibility: partialCodeJSON.repositoryVisibility,
+    laborHours: partialCodeJSON.laborHours,
     languages: partialCodeJSON.languages,
+    reuseFrequency: {
+      forks: partialCodeJSON.reuseFrequency?.forks ?? 0,
+      clones: existingCodeJSON?.reuseFrequency?.clones ?? 0,
+    },
+    tags: tags,
     date: {
       created: partialCodeJSON.date?.created ?? "",
       lastModified: partialCodeJSON.date?.lastModified ?? "",
@@ -102,5 +123,6 @@ export async function run(): Promise<void> {
     };
   }
 
-  await helpers.sendPR(finalCodeJSON);
+  const baseBranchName = await helpers.getBaseBranch();
+  await helpers.sendPR(finalCodeJSON, baseBranchName);
 }
