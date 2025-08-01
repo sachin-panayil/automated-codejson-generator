@@ -58357,11 +58357,12 @@ async function sendPR(updatedCodeJSON, baseBranchName) {
         });
         if (PR) {
             coreExports.info(`Successfully created PR: ${PR.data.html_url}`);
-            coreExports.setOutput("updated", PR);
+            coreExports.setOutput("updated", true);
             coreExports.setOutput("pr_url", PR.data.html_url);
         }
         else {
             coreExports.error(`Failed to create PR because of PR object`);
+            coreExports.setOutput("updated", false);
         }
     }
     catch (error) {

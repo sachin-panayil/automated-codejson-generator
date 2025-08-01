@@ -168,10 +168,11 @@ export async function sendPR(
     if (PR) {
       core.info(`Successfully created PR: ${PR.data.html_url}`);
 
-      core.setOutput("updated", PR);
+      core.setOutput("updated", true);
       core.setOutput("pr_url", PR.data.html_url);
     } else {
       core.error(`Failed to create PR because of PR object`);
+      core.setOutput("updated", false);
     }
   } catch (error) {
     core.error(`Failed to create PR: ${error}`);
