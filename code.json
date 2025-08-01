@@ -1,6 +1,6 @@
 {
   "name": "automated-codejson-generator",
-  "description": "Tooling that allows for code.json creation through automation",
+  "description": "local fork to test GitHub Actions",
   "longDescription": "This project provides a GitHub Action that helps federal agencies maintain their code.json files, which are required for compliance with the Federal Source Code Policy. The action automatically calculates and updates various metadata fields including labor hours, programming languages used, repository information, and timestamps. It creates pull requests with these updates, making it easier to keep code.json files accurate and up-to-date.",
   "status": "Production",
   "permissions": {
@@ -14,28 +14,40 @@
     "exemptionText": ""
   },
   "organization": "Centers for Medicare & Medicaid Services",
-  "repositoryURL": "https://github.com/DSACMS/automated-codejson-generator",
+  "repositoryURL": "https://github.com/sachin-panayil/automated-codejson-generator",
   "projectURL": "",
   "repositoryHost": "github.com/DSACMS",
-  "repositoryVisibility": "",
+  "repositoryVisibility": "public",
   "vcs": "git",
   "laborHours": 11713,
   "reuseFrequency": {
     "forks": 0,
     "clones": 0
   },
-  "platforms": ["web", "linux"],
-  "categories": ["developer-tools", "automation"],
+  "platforms": [
+    "web",
+    "linux"
+  ],
+  "categories": [
+    "developer-tools",
+    "automation"
+  ],
   "softwareType": "standalone/backend",
-  "languages": ["TypeScript", "JavaScript"],
+  "languages": [
+    "TypeScript",
+    "JavaScript"
+  ],
   "maintenance": "internal",
   "contractNumber": "",
   "date": {
-    "created": "2025-02-07T16:29:38Z",
-    "lastModified": "2025-06-06T17:48:49Z",
-    "metaDataLastUpdated": "2025-06-06T17:49:37.841Z"
+    "created": "2025-08-01T17:21:32Z",
+    "lastModified": "2025-08-01T19:18:37Z",
+    "metaDataLastUpdated": "2025-08-01T19:38:31.850Z"
   },
-  "tags": ["github-action", "codejson"],
+  "tags": [
+    "github-action",
+    "codejson"
+  ],
   "contact": {
     "email": "opensource@cms.hhs.gov",
     "name": "CMS Open Source Team"
@@ -51,7 +63,11 @@
   "projects": [],
   "systems": [],
   "upstream": "",
-  "subsetInHealthcare": ["Operational"],
-  "userType": ["Government"],
+  "subsetInHealthcare": [
+    "Operational"
+  ],
+  "userType": [
+    "Government"
+  ],
   "maturityModelTier": 3
 }
