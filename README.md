@@ -56,6 +56,10 @@ jobs:
           BRANCH: "main" # Make sure this is the name of your default branch!
 ```
 
+⚠️ _Please make sure the following are enabled within your Repository Action Settings in order to work properly_ ⚠️
+<img width="789" height="361" alt="Screenshot 2025-08-05 at 1 44 36 PM" src="https://github.com/user-attachments/assets/3795dc0e-c4c4-4378-8eb2-b7b9d861c08a" />
+
+
 ## Generation Context
 
 The automated code.json generator calculates specific fields by analyzing your repository and using GitHub's API. Here's what gets generated and what your repository needs for successful generation.
