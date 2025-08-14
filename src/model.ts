@@ -21,7 +21,7 @@ export interface CodeJSON {
   date: Date; // calculated
   tags: string[]; // calculated
   contact: Contact;
-  feedbackMechanisms: string; // calculated
+  feedbackMechanism: string; // calculated
   AIUseCaseInventory: boolean;
   localisation: boolean;
   repositoryType: string;

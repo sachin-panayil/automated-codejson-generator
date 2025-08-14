@@ -43,7 +43,7 @@ const baselineCodeJSON: CodeJSON = {
     email: "",
     name: "",
   },
-  feedbackMechanisms: "",
+  feedbackMechanism: "",
   AIUseCaseInventory: false,
   localisation: false,
   repositoryType: "",
@@ -64,7 +64,7 @@ async function getMetaData(
   const partialCodeJSON = await helpers.calculateMetaData();
 
   // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
-  const feedbackMechanisms = existingCodeJSON?.feedbackMechanisms || `${partialCodeJSON.repositoryURL}/issues`;
+  const feedbackMechanism = existingCodeJSON?.feedbackMechanism || `${partialCodeJSON.repositoryURL}/issues`;
 
   // only use the calculated description if its not empty, otherwise keep existing
   const shouldUpdateDescription =
@@ -98,7 +98,7 @@ async function getMetaData(
       metaDataLastUpdated:
         partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
     },
-    feedbackMechanisms,
+    feedbackMechanism,
   };
 }
 
