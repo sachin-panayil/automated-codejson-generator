@@ -44,7 +44,7 @@ const baselineCodeJSON: CodeJSON = {
     name: "",
   },
   feedbackMechanism: "",
-  AIUseCaseInventory: false,
+  AIUseCaseID: "0",
   localisation: false,
   repositoryType: "",
   userInput: false,
