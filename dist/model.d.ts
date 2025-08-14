@@ -22,6 +22,7 @@ export interface CodeJSON {
     tags: string[];
     contact: Contact;
     feedbackMechanisms: string;
+    AIUseCaseInventory: boolean;
     localisation: boolean;
     repositoryType: string;
     userInput: boolean;

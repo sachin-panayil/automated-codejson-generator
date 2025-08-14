@@ -58430,6 +58430,7 @@ const baselineCodeJSON = {
         name: "",
     },
     feedbackMechanisms: "",
+	AIUseCaseInventory: false,
     localisation: false,
     repositoryType: "",
     userInput: false,

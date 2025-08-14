@@ -44,6 +44,7 @@ const baselineCodeJSON: CodeJSON = {
     name: "",
   },
   feedbackMechanisms: "",
+  AIUseCaseInventory: false,
   localisation: false,
   repositoryType: "",
   userInput: false,
@@ -63,10 +64,7 @@ async function getMetaData(
   const partialCodeJSON = await helpers.calculateMetaData();
 
   // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
-  const existingMechanisms = existingCodeJSON?.feedbackMechanisms || "";
-  const feedbackMechanisms = existingMechanisms
-    ? existingMechanisms
-    : [`${partialCodeJSON.repositoryURL}/issues`];
+  const feedbackMechanisms = existingCodeJSON?.feedbackMechanisms || `${partialCodeJSON.repositoryURL}/issues`;
 
   // only use the calculated description if its not empty, otherwise keep existing
   const shouldUpdateDescription =
