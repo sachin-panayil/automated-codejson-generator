@@ -29,7 +29,7 @@
   "softwareType": "standalone/backend",
   "languages": ["TypeScript", "JavaScript"],
   "maintenance": "internal",
-  "contractNumber": "",
+  "contractNumber": [],
   "date": {
     "created": "2025-02-07T16:29:38Z",
     "lastModified": "2025-06-06T17:48:49Z",
@@ -40,9 +40,7 @@
     "email": "opensource@cms.hhs.gov",
     "name": "CMS Open Source Team"
   },
-  "feedbackMechanisms": [
-    "https://github.com/DSACMS/automated-codejson-generator/issues"
-  ],
+  "feedbackMechanism": "https://github.com/DSACMS/automated-codejson-generator/issues",
   "localisation": false,
   "repositoryType": "tools",
   "userInput": false,
