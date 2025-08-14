@@ -17,11 +17,11 @@ export interface CodeJSON {
   softwareType: string;
   languages: string[]; // calculated
   maintenance: string;
-  contractNumber: string;
+  contractNumber: string[];
   date: Date; // calculated
   tags: string[]; // calculated
   contact: Contact;
-  feedbackMechanisms: string[]; // semi-calculated
+  feedbackMechanisms: string; // calculated
   localisation: boolean;
   repositoryType: string;
   userInput: boolean;
