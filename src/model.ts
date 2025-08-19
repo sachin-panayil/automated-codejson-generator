@@ -43,7 +43,7 @@ export interface ReuseFrequency {
 
 export interface Permissions {
   license: License[];
-  usageType: string;
+  usageType: string[];
   exemptionText: string;
 }
 

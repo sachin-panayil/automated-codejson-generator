@@ -13,7 +13,7 @@ const baselineCodeJSON: CodeJSON = {
         URL: "",
       },
     ],
-    usageType: "",
+    usageType: [],
     exemptionText: "",
   },
   organization: "",

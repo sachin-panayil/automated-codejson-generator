@@ -58399,7 +58399,7 @@ const baselineCodeJSON = {
                 URL: "",
             },
         ],
-        usageType: "",
+        usageType: [],
         exemptionText: "",
     },
     organization: "",
