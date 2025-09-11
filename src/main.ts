@@ -13,7 +13,7 @@ const baselineCodeJSON: CodeJSON = {
         URL: "",
       },
     ],
-    usageType: "",
+    usageType: [],
     exemptionText: "",
   },
   organization: "",
@@ -32,7 +32,7 @@ const baselineCodeJSON: CodeJSON = {
   softwareType: "",
   languages: [],
   maintenance: "",
-  contractNumber: "",
+  contractNumber: [],
   date: {
     created: "",
     lastModified: "",
@@ -43,7 +43,8 @@ const baselineCodeJSON: CodeJSON = {
     email: "",
     name: "",
   },
-  feedbackMechanisms: [],
+  feedbackMechanism: "",
+  AIUseCaseID: "0",
   localisation: false,
   repositoryType: "",
   userInput: false,
@@ -63,11 +64,7 @@ async function getMetaData(
   const partialCodeJSON = await helpers.calculateMetaData();
 
   // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
-  const existingMechanisms = existingCodeJSON?.feedbackMechanisms || [];
-  const feedbackMechanisms =
-    existingMechanisms.length > 0
-      ? existingMechanisms
-      : [`${partialCodeJSON.repositoryURL}/issues`];
+  const feedbackMechanism = existingCodeJSON?.feedbackMechanism || `${partialCodeJSON.repositoryURL}/issues`;
 
   // only use the calculated description if its not empty, otherwise keep existing
   const shouldUpdateDescription =
@@ -101,7 +98,7 @@ async function getMetaData(
       metaDataLastUpdated:
         partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
     },
-    feedbackMechanisms,
+    feedbackMechanism,
   };
 }
 
