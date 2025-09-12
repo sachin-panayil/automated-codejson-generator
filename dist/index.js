@@ -58389,6 +58389,7 @@ function bodyOfPR() {
 
 const baselineCodeJSON = {
     name: "",
+	version: "",
     description: "",
     longDescription: "",
     status: "",
@@ -58404,9 +58405,12 @@ const baselineCodeJSON = {
     },
     organization: "",
     repositoryURL: "",
-    projectURL: "",
     repositoryHost: "github",
     repositoryVisibility: "",
+	homepageURL: "",
+	downloadURL: "",
+	disclaimerURL: "",
+	disclaimerText: "",
     vcs: "git",
     laborHours: 0,
     reuseFrequency: {
@@ -58419,6 +58423,10 @@ const baselineCodeJSON = {
     languages: [],
     maintenance: "",
     contractNumber: [],
+	SBOM: "",
+	relatedCode: [],
+	reusedCode: [],
+	partners: [],
     date: {
         created: "",
         lastModified: "",
@@ -58438,7 +58446,6 @@ const baselineCodeJSON = {
     group: "",
     projects: [],
     systems: [],
-    upstream: "",
     subsetInHealthcare: [],
     userType: [],
     maturityModelTier: 0,

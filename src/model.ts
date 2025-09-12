@@ -1,14 +1,18 @@
 export interface CodeJSON {
   name: string; // calculated
+  version?: string;
   description: string; // calculated
   longDescription: string;
   status: string;
   permissions: Permissions;
   organization: string;
   repositoryURL: string; // calculated
-  projectURL: string;
   repositoryHost: string;
   repositoryVisibility: string; // calculated
+  homepageURL?: string;
+  downloadURL?: string;
+  disclaimerURL?: string;
+  disclaimerText?: string;
   vcs: string;
   laborHours: number; // calculated
   reuseFrequency: ReuseFrequency; // semi-calculated
@@ -18,6 +22,10 @@ export interface CodeJSON {
   languages: string[]; // calculated
   maintenance: string;
   contractNumber: string[];
+  SBOM: string;
+  relatedCode?: RelatedCode[];
+  reusedCode?: ReusedCode[];
+  partners?: Partner[];
   date: Date; // calculated
   tags: string[]; // calculated
   contact: Contact;
@@ -30,7 +38,6 @@ export interface CodeJSON {
   group: string;
   projects: string[];
   systems: string[];
-  upstream: string;
   subsetInHealthcare: string[];
   userType: string[];
   maturityModelTier: number;
@@ -50,6 +57,22 @@ export interface Permissions {
 export interface License {
   name: string;
   URL: string;
+}
+
+export interface RelatedCode {
+  name: string;
+  URL: string;
+  isGovernmentRepo: boolean;
+}
+
+export interface ReusedCode {
+  name: string;
+  URL: string;
+}
+
+export interface Partner {
+  name: string;
+  email: string;
 }
 
 export interface Date {

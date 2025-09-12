@@ -3,6 +3,7 @@ import * as helpers from "./helper.js";
 
 const baselineCodeJSON: CodeJSON = {
   name: "",
+  version: "",
   description: "",
   longDescription: "",
   status: "",
@@ -18,9 +19,12 @@ const baselineCodeJSON: CodeJSON = {
   },
   organization: "",
   repositoryURL: "",
-  projectURL: "",
   repositoryHost: "github",
   repositoryVisibility: "",
+  homepageURL: "",
+	downloadURL: "",
+	disclaimerURL: "",
+	disclaimerText: "",
   vcs: "git",
   laborHours: 0,
   reuseFrequency: {
@@ -33,6 +37,10 @@ const baselineCodeJSON: CodeJSON = {
   languages: [],
   maintenance: "",
   contractNumber: [],
+  SBOM: "",
+	relatedCode: [],
+	reusedCode: [],
+	partners: [],
   date: {
     created: "",
     lastModified: "",
@@ -52,7 +60,6 @@ const baselineCodeJSON: CodeJSON = {
   group: "",
   projects: [],
   systems: [],
-  upstream: "",
   subsetInHealthcare: [],
   userType: [],
   maturityModelTier: 0,
