@@ -52,7 +52,6 @@
     "name": "CMS Open Source Team"
   },
   "feedbackMechanism": "https://github.com/DSACMS/automated-codejson-generator/issues",
-  "AIUseCaseID": "0",
   "localisation": false,
   "repositoryType": "tools",
   "userInput": false,

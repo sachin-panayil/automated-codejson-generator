@@ -17,11 +17,12 @@ export interface CodeJSON {
     softwareType: string;
     languages: string[];
     maintenance: string;
-    contractNumber: string;
+    contractNumber: string[];
     date: Date;
     tags: string[];
     contact: Contact;
-    feedbackMechanisms: string[];
+    feedbackMechanism: string;
+    AIUseCaseID: string;
     localisation: boolean;
     repositoryType: string;
     userInput: boolean;
@@ -40,7 +41,7 @@ export interface ReuseFrequency {
 }
 export interface Permissions {
     license: License[];
-    usageType: string;
+    usageType: string[];
     exemptionText: string;
 }
 export interface License {

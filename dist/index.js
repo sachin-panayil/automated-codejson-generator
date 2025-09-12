@@ -58399,7 +58399,7 @@ const baselineCodeJSON = {
                 URL: "",
             },
         ],
-        usageType: "",
+        usageType: [],
         exemptionText: "",
     },
     organization: "",
@@ -58418,7 +58418,7 @@ const baselineCodeJSON = {
     softwareType: "",
     languages: [],
     maintenance: "",
-    contractNumber: "",
+    contractNumber: [],
     date: {
         created: "",
         lastModified: "",
@@ -58429,7 +58429,8 @@ const baselineCodeJSON = {
         email: "",
         name: "",
     },
-    feedbackMechanisms: [],
+    feedbackMechanism: "",
+	AIUseCaseID: "0",
     localisation: false,
     repositoryType: "",
     userInput: false,
@@ -58445,10 +58446,7 @@ const baselineCodeJSON = {
 async function getMetaData(existingCodeJSON) {
     const partialCodeJSON = await calculateMetaData();
     // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
-    const existingMechanisms = existingCodeJSON?.feedbackMechanisms || [];
-    const feedbackMechanisms = existingMechanisms.length > 0
-        ? existingMechanisms
-        : [`${partialCodeJSON.repositoryURL}/issues`];
+    const feedbackMechanism = existingCodeJSON?.feedbackMechanism || `${partialCodeJSON.repositoryURL}/issues`;
     // only use the calculated description if its not empty, otherwise keep existing
     const shouldUpdateDescription = partialCodeJSON.description && partialCodeJSON.description.trim() !== "";
     const description = shouldUpdateDescription
@@ -58476,7 +58474,7 @@ async function getMetaData(existingCodeJSON) {
             lastModified: partialCodeJSON.date?.lastModified ?? "",
             metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
         },
-        feedbackMechanisms,
+        feedbackMechanism,
     };
 }
 async function run() {
