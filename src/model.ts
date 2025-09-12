@@ -22,7 +22,7 @@ export interface CodeJSON {
   languages: string[]; // calculated
   maintenance: string;
   contractNumber: string[];
-  SBOM: string;
+  SBOM: string; //calculated
   relatedCode?: RelatedCode[];
   reusedCode?: ReusedCode[];
   partners?: Partner[];

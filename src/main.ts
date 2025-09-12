@@ -22,9 +22,9 @@ const baselineCodeJSON: CodeJSON = {
   repositoryHost: "github",
   repositoryVisibility: "",
   homepageURL: "",
-	downloadURL: "",
-	disclaimerURL: "",
-	disclaimerText: "",
+  downloadURL: "",
+  disclaimerURL: "",
+  disclaimerText: "",
   vcs: "git",
   laborHours: 0,
   reuseFrequency: {
@@ -38,9 +38,9 @@ const baselineCodeJSON: CodeJSON = {
   maintenance: "",
   contractNumber: [],
   SBOM: "",
-	relatedCode: [],
-	reusedCode: [],
-	partners: [],
+  relatedCode: [],
+  reusedCode: [],
+  partners: [],
   date: {
     created: "",
     lastModified: "",
@@ -72,6 +72,9 @@ async function getMetaData(
 
   // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
   const feedbackMechanism = existingCodeJSON?.feedbackMechanism || `${partialCodeJSON.repositoryURL}/issues`;
+
+  // preserve existing SBOM link if they exist, otherwise default to GitHub SBOM link
+  const SBOM = existingCodeJSON?.SBOM || `${partialCodeJSON.repositoryURL}/network/dependencies`;
 
   // only use the calculated description if its not empty, otherwise keep existing
   const shouldUpdateDescription =
@@ -106,6 +109,7 @@ async function getMetaData(
         partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
     },
     feedbackMechanism,
+    SBOM
   };
 }
 

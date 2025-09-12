@@ -58454,6 +58454,8 @@ async function getMetaData(existingCodeJSON) {
     const partialCodeJSON = await calculateMetaData();
     // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
     const feedbackMechanism = existingCodeJSON?.feedbackMechanism || `${partialCodeJSON.repositoryURL}/issues`;
+	// preserve existing SBOM link if they exist, otherwise default to GitHub SBOM link
+	const SBOM = existingCodeJSON?.SBOM || `${partialCodeJSON.repositoryURL}/network/dependencies`;
     // only use the calculated description if its not empty, otherwise keep existing
     const shouldUpdateDescription = partialCodeJSON.description && partialCodeJSON.description.trim() !== "";
     const description = shouldUpdateDescription
@@ -58482,6 +58484,7 @@ async function getMetaData(existingCodeJSON) {
             metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
         },
         feedbackMechanism,
+		SBOM
     };
 }
 async function run() {
