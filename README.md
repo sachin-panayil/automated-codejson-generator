@@ -76,6 +76,8 @@ The automated code.json generator calculates specific fields by analyzing your r
 
 **languages**: This field populates the programming languages in your repository. No configuration needed.
 
+**SBOM**: The repository's SBOM URL in the format of {repositoryURL/network/dependencies}. If you already have a code.json file with the SBOM, the generator preserves those values. No configuration needed.
+
 **dateCreated**: The generator pulls your repository's creation date. No configuration needed.
 
 **dateLastModified**: This uses your repository's last update timestamp, reflecting the most recent changes. No configuration needed.
