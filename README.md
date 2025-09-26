@@ -4,15 +4,28 @@ A GitHub Action that automatically generates and maintains code.json files for f
 
 ## About the Project
 
-This project provides a GitHub Action that helps federal agencies maintain their code.json files, which are required for compliance with the Federal Source Code Policy. The action automatically calculates and updates various metadata fields including labor hours, programming languages used, repository information, and timestamps. It creates pull requests with these updates, making it easier to keep code.json files accurate and up-to-date.
+This project provides a GitHub Action that helps federal agencies maintain their code.json files, which are required for compliance with the Federal Source Code Policy. The action automatically calculates and updates various metadata fields including labor hours, programming languages used, repository information, and timestamps. It can either create pull requests or push directly to branches (with appropriate permissions), making it easier to keep code.json files accurate and up-to-date.
 
 ## Inputs
 
 ```yaml
 GITHUB_TOKEN:
-  description: "GitHub token used for API access"
+  description: "GitHub token used for API access and PR creation"
   required: true
   default: ${{ github.token }}
+
+BRANCH:
+  description: "Name of the branch to update"
+  required: false
+
+SKIP_PR:
+  description: "Try to push directly to branch first, fallback to PR if it fails. Requires ADMIN_TOKEN."
+  required: false
+  default: "false"
+
+ADMIN_TOKEN:
+  description: "Personal Access Token with admin/write privileges for direct push. Required when SKIP_PR is true."
+  required: false
 ```
 
 ## Outputs
@@ -21,12 +34,62 @@ GITHUB_TOKEN:
 updated:
   description: "Boolean indicating whether code.json was updated"
 pr_url:
-  description: "URL of the created pull request if changes were made"
+  description: "URL of the created pull request if changes were made via PR"
+commit_sha:
+  description: "SHA of the commit if pushed directly to branch"
+method_used:
+  description: "Method used for the update: 'direct_push' or 'pull_request'"
 ```
 
 ## Workflow Examples
 
-### Create a PR to add compliant code.json
+### Option 1: Direct Push
+
+This approach tries to push directly to the branch using a Personal Access Token, but falls back to creating a pull request if the direct push fails.
+
+```yaml
+name: Update Code.json (Smart Mode)
+on:
+  schedule:
+    - cron: 0 0 1 * * # First day of every month
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  update-code-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update code.json
+        id: update
+        uses: DSACMS/automated-codejson-generator@v1.2.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_PAT }}  # PAT with admin/push permissions
+          BRANCH: "main"
+          SKIP_PR: "true"
+
+      - name: Report update method
+        run: |
+          echo "Update successful: ${{ steps.update.outputs.updated }}"
+          if [ "${{ steps.update.outputs.method_used }}" = "direct_push" ]; then
+            echo "Direct push successful! Commit SHA: ${{ steps.update.outputs.commit_sha }}"
+          elif [ "${{ steps.update.outputs.method_used }}" = "pull_request" ]; then
+            echo "Created pull request: ${{ steps.update.outputs.pr_url }}"
+          fi
+```
+
+### Option 2: Pull Request Only
+
+This approach always creates a pull request, ensuring code review for all changes.
 
 ```yaml
 name: Update Code.json
@@ -50,11 +113,39 @@ jobs:
           fetch-depth: 0
 
       - name: Update code.json
-        uses: DSACMS/automated-codejson-generator@v1.0.0
+        uses: DSACMS/automated-codejson-generator@latest
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: "main" # Make sure this is the name of your default branch!
+          BRANCH: "main"
+          SKIP_PR: "false" 
 ```
+
+## Setting Up Personal Access Token (PAT)
+
+To use the direct push functionality, you'll need to create a Personal Access Token:
+
+### Creating a PAT
+
+1. **Go to GitHub Settings**: Navigate to your GitHub account settings
+2. **Developer Settings**: Click on "Developer settings" in the left sidebar
+3. **Personal Access Tokens**: Choose "Tokens (classic)" or "Fine-grained tokens"
+4. **Generate New Token**: Click "Generate new token"
+5. **Configure Token**:
+   - **Name**: Give it a descriptive name like "Code.json Generator"
+   - **Expiration**: Set appropriate expiration (recommend 90 days or 1 year)
+   - **Scopes**: 
+     - For classic tokens: Select `repo` (full repository access)
+     - For fine-grained tokens: Select `Contents` (write) and `Metadata` (read)
+
+### Adding PAT to Repository
+
+1. **Repository Settings**: Go to your repository's Settings tab
+2. **Secrets and Variables**: Click on "Secrets and variables" → "Actions"
+3. **New Secret**: Click "New repository secret"
+4. **Configure Secret**:
+   - **Name**: `ADMIN_PAT`
+   - **Value**: Paste your Personal Access Token
+5. **Save**: Click "Add secret"
 
 ⚠️ _Please make sure the following are enabled within your Repository Action Settings in order to work properly_ ⚠️
 <img width="789" height="361" alt="Screenshot 2025-08-05 at 1 44 36 PM" src="https://github.com/user-attachments/assets/3795dc0e-c4c4-4378-8eb2-b7b9d861c08a" />
