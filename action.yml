@@ -9,14 +9,27 @@ inputs:
     default: ${{ github.token }}
 
   BRANCH:
-    description: "Name of the branch the PR is sent to"
+    description: "Name of the branch to update"
+    required: false
+
+  SKIP_PR:
+    description: "Try to push directly to branch first, fallback to PR if it fails. Requires ADMIN_TOKEN."
+    required: false
+    default: "false"
+
+  ADMIN_TOKEN:
+    description: "Personal Access Token with admin/write privileges for direct push. Required when SKIP_PR is true."
     required: false
 
 outputs:
   updated:
     description: "Boolean indicating whether code.json was updated"
   pr_url:
-    description: "URL of the created pull request if changes were made"
+    description: "URL of the created pull request if changes were made via PR"
+  commit_sha:
+    description: "SHA of the commit if pushed directly to branch"
+  method_used:
+    description: "Method used for the update: 'direct_push' or 'pull_request'"
 
 runs:
   using: docker
