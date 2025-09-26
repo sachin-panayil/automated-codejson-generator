@@ -28,10 +28,9 @@ jobs:
       - name: Post update information
         run: |
           echo "Update successful: ${{ steps.generator.outputs.updated }}"
-          echo "Method used: ${{ steps.generator.outputs.method_used }}"
           if [ "${{ steps.generator.outputs.method_used }}" = "direct_push" ]; then
-            echo "✅ Direct push successful! Commit SHA: ${{ steps.generator.outputs.commit_sha }}"
+            echo "Direct push successful! Commit SHA: ${{ steps.generator.outputs.commit_sha }}"
           elif [ "${{ steps.generator.outputs.method_used }}" = "pull_request" ]; then
-            echo "📝 Created pull request: ${{ steps.generator.outputs.pr_url }}"
+            echo "Created pull request: ${{ steps.generator.outputs.pr_url }}"
             fi
   
