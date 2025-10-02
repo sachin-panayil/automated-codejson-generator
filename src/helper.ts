@@ -157,7 +157,7 @@ export async function sendPR(
   baseBranchName: string,
 ) {
   try {
-    const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
+    const formattedContent = JSON.stringify(updatedCodeJSON, null, 2) + "\n";
     const headBranchName = `code-json-${new Date().getTime()}`;
 
     const PR = await octokit.createPullRequest({
