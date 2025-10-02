@@ -21,9 +21,16 @@ jobs:
         uses: DSACMS/automated-codejson-generator@main
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_PAT }} 
           BRANCH: "main"
+          SKIP_PR: "true"
 
-      - name: Print outputs
+      - name: Post update information
         run: |
-          echo "Your code.json has been updated: ${{steps.generator.outputs.updated}}"
-          echo "Pull Request Link: ${{steps.generator.outputs.pr_url}}"
+          echo "Update successful: ${{ steps.generator.outputs.updated }}"
+          if [ "${{ steps.generator.outputs.method_used }}" = "direct_push" ]; then
+            echo "Direct push successful! Commit SHA: ${{ steps.generator.outputs.commit_sha }}"
+          elif [ "${{ steps.generator.outputs.method_used }}" = "pull_request" ]; then
+            echo "Created pull request: ${{ steps.generator.outputs.pr_url }}"
+            fi
+  

@@ -1,3 +1,4 @@
+import * as core from "@actions/core";
 import { CodeJSON } from "./model.js";
 import * as helpers from "./helper.js";
 
@@ -71,10 +72,14 @@ async function getMetaData(
   const partialCodeJSON = await helpers.calculateMetaData();
 
   // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
-  const feedbackMechanism = existingCodeJSON?.feedbackMechanism || `${partialCodeJSON.repositoryURL}/issues`;
+  const feedbackMechanism =
+    existingCodeJSON?.feedbackMechanism ||
+    `${partialCodeJSON.repositoryURL}/issues`;
 
   // preserve existing SBOM link if they exist, otherwise default to GitHub SBOM link
-  const SBOM = existingCodeJSON?.SBOM || `${partialCodeJSON.repositoryURL}/network/dependencies`;
+  const SBOM =
+    existingCodeJSON?.SBOM ||
+    `${partialCodeJSON.repositoryURL}/network/dependencies`;
 
   // only use the calculated description if its not empty, otherwise keep existing
   const shouldUpdateDescription =
@@ -109,7 +114,7 @@ async function getMetaData(
         partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
     },
     feedbackMechanism,
-    SBOM
+    SBOM,
   };
 }
 
@@ -132,5 +137,24 @@ export async function run(): Promise<void> {
   }
 
   const baseBranchName = await helpers.getBaseBranch();
-  await helpers.sendPR(finalCodeJSON, baseBranchName);
+  const skipPR = core.getInput("SKIP_PR", { required: false }) === "true";
+  const adminToken = core.getInput("ADMIN_TOKEN", { required: false });
+
+  if (skipPR) {
+    if (!adminToken) {
+      core.warning("SKIP_PR is enabled but ADMIN_TOKEN is not provided.");
+      core.warning(
+        "Direct push requires a Personal Access Token with appropriate permissions.",
+      );
+
+      core.info("Falling back to pull request creation");
+      await helpers.sendPR(finalCodeJSON, baseBranchName);
+    } else {
+      core.info("Attempting direct push");
+      await helpers.pushDirectlyWithFallback(finalCodeJSON, baseBranchName);
+    }
+  } else {
+    core.info("Attempting pull request creation");
+    await helpers.sendPR(finalCodeJSON, baseBranchName);
+  }
 }

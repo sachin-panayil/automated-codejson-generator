@@ -58218,6 +58218,7 @@ createPullRequest.VERSION = VERSION;
 
 const execAsync = promisify(exec$1);
 const TOKEN = coreExports.getInput("GITHUB_TOKEN", { required: true });
+const ADMIN_TOKEN = coreExports.getInput("ADMIN_TOKEN", { required: false });
 const MyOctoKit = Octokit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
     auth: TOKEN,
@@ -58228,6 +58229,17 @@ const octokit = new MyOctoKit({
         error: coreExports.error,
     },
 });
+const adminOctokit = ADMIN_TOKEN
+    ? new MyOctoKit({
+        auth: ADMIN_TOKEN,
+        log: {
+            debug: coreExports.debug,
+            info: coreExports.info,
+            warn: coreExports.warning,
+            error: coreExports.error,
+        },
+    })
+    : null;
 const owner = process.env.GITHUB_REPOSITORY_OWNER ?? "";
 const repo = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "";
 const HOURS_PER_MONTH = 730.001;
@@ -58359,6 +58371,7 @@ async function sendPR(updatedCodeJSON, baseBranchName) {
             coreExports.info(`Successfully created PR: ${PR.data.html_url}`);
             coreExports.setOutput("updated", true);
             coreExports.setOutput("pr_url", PR.data.html_url);
+            coreExports.setOutput("method_used", "pull_request");
         }
         else {
             coreExports.error(`Failed to create PR because of PR object`);
@@ -58367,6 +58380,62 @@ async function sendPR(updatedCodeJSON, baseBranchName) {
     }
     catch (error) {
         coreExports.error(`Failed to create PR: ${error}`);
+    }
+}
+async function pushDirectlyWithPAT(updatedCodeJSON, baseBranchName) {
+    if (!adminOctokit) {
+        coreExports.error("Admin token not provided for direct push");
+        return false;
+    }
+    try {
+        const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
+        let currentFileSha;
+        try {
+            const currentFile = await adminOctokit.rest.repos.getContent({
+                owner,
+                repo,
+                path: "code.json",
+                ref: baseBranchName,
+            });
+            if ("sha" in currentFile.data) {
+                currentFileSha = currentFile.data.sha;
+            }
+        }
+        catch (error) {
+            coreExports.info("code.json doesn't exist yet, will create new file");
+        }
+        const result = await adminOctokit.rest.repos.createOrUpdateFileContents({
+            owner,
+            repo,
+            path: "code.json",
+            message: "Update code.json metadata",
+            content: Buffer.from(formattedContent).toString("base64"),
+            branch: baseBranchName,
+            sha: currentFileSha,
+        });
+        coreExports.info(`Successfully pushed commit with PAT: ${result.data.commit.sha}`);
+        coreExports.setOutput("updated", true);
+        coreExports.setOutput("commit_sha", result.data.commit.sha);
+        coreExports.setOutput("method_used", "direct_push");
+        return true;
+    }
+    catch (error) {
+        coreExports.error(`Failed to push directly with PAT: ${error}`);
+        return false;
+    }
+}
+async function pushDirectlyWithFallback(updatedCodeJSON, baseBranchName) {
+    if (!ADMIN_TOKEN) {
+        coreExports.error("SKIP_PR is enabled but ADMIN_TOKEN is not provided. Direct push requires an admin PAT.");
+        coreExports.info("Falling back to creating a pull request");
+        await sendPR(updatedCodeJSON, baseBranchName);
+        return;
+    }
+    coreExports.info("Attempting direct push with admin PAT!");
+    const directPushSuccess = await pushDirectlyWithPAT(updatedCodeJSON, baseBranchName);
+    if (!directPushSuccess) {
+        coreExports.info("Direct push with PAT failed, falling back to creating a pull request");
+        await sendPR(updatedCodeJSON, baseBranchName);
     }
 }
 function bodyOfPR() {
@@ -58389,7 +58458,7 @@ function bodyOfPR() {
 
 const baselineCodeJSON = {
     name: "",
-	version: "",
+    version: "",
     description: "",
     longDescription: "",
     status: "",
@@ -58407,10 +58476,10 @@ const baselineCodeJSON = {
     repositoryURL: "",
     repositoryHost: "github",
     repositoryVisibility: "",
-	homepageURL: "",
-	downloadURL: "",
-	disclaimerURL: "",
-	disclaimerText: "",
+    homepageURL: "",
+    downloadURL: "",
+    disclaimerURL: "",
+    disclaimerText: "",
     vcs: "git",
     laborHours: 0,
     reuseFrequency: {
@@ -58423,10 +58492,10 @@ const baselineCodeJSON = {
     languages: [],
     maintenance: "",
     contractNumber: [],
-	SBOM: "",
-	relatedCode: [],
-	reusedCode: [],
-	partners: [],
+    SBOM: "",
+    relatedCode: [],
+    reusedCode: [],
+    partners: [],
     date: {
         created: "",
         lastModified: "",
@@ -58438,7 +58507,7 @@ const baselineCodeJSON = {
         name: "",
     },
     feedbackMechanism: "",
-	AIUseCaseID: "0",
+    AIUseCaseID: "0",
     localisation: false,
     repositoryType: "",
     userInput: false,
@@ -58453,9 +58522,11 @@ const baselineCodeJSON = {
 async function getMetaData(existingCodeJSON) {
     const partialCodeJSON = await calculateMetaData();
     // preserve existing feedback mechanisms if they exist, otherwise default to GitHub Issues
-    const feedbackMechanism = existingCodeJSON?.feedbackMechanism || `${partialCodeJSON.repositoryURL}/issues`;
-	// preserve existing SBOM link if they exist, otherwise default to GitHub SBOM link
-	const SBOM = existingCodeJSON?.SBOM || `${partialCodeJSON.repositoryURL}/network/dependencies`;
+    const feedbackMechanism = existingCodeJSON?.feedbackMechanism ||
+        `${partialCodeJSON.repositoryURL}/issues`;
+    // preserve existing SBOM link if they exist, otherwise default to GitHub SBOM link
+    const SBOM = existingCodeJSON?.SBOM ||
+        `${partialCodeJSON.repositoryURL}/network/dependencies`;
     // only use the calculated description if its not empty, otherwise keep existing
     const shouldUpdateDescription = partialCodeJSON.description && partialCodeJSON.description.trim() !== "";
     const description = shouldUpdateDescription
@@ -58484,7 +58555,7 @@ async function getMetaData(existingCodeJSON) {
             metaDataLastUpdated: partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
         },
         feedbackMechanism,
-		SBOM
+        SBOM,
     };
 }
 async function run() {
@@ -58505,7 +58576,24 @@ async function run() {
         };
     }
     const baseBranchName = await getBaseBranch();
-    await sendPR(finalCodeJSON, baseBranchName);
+    const skipPR = coreExports.getInput("SKIP_PR", { required: false }) === "true";
+    const adminToken = coreExports.getInput("ADMIN_TOKEN", { required: false });
+    if (skipPR) {
+        if (!adminToken) {
+            coreExports.warning("SKIP_PR is enabled but ADMIN_TOKEN is not provided.");
+            coreExports.warning("Direct push requires a Personal Access Token with appropriate permissions.");
+            coreExports.info("Falling back to pull request creation");
+            await sendPR(finalCodeJSON, baseBranchName);
+        }
+        else {
+            coreExports.info("Attempting direct push");
+            await pushDirectlyWithFallback(finalCodeJSON, baseBranchName);
+        }
+    }
+    else {
+        coreExports.info("Attempting pull request creation");
+        await sendPR(finalCodeJSON, baseBranchName);
+    }
 }
 
 /**

@@ -11,6 +11,7 @@ import { CodeJSON, BasicRepoInfo } from "./model.js";
 const execAsync = promisify(exec);
 
 const TOKEN = core.getInput("GITHUB_TOKEN", { required: true });
+const ADMIN_TOKEN = core.getInput("ADMIN_TOKEN", { required: false });
 
 const MyOctoKit = ActionKit.plugin(createPullRequest);
 const octokit = new MyOctoKit({
@@ -22,6 +23,18 @@ const octokit = new MyOctoKit({
     error: core.error,
   },
 });
+
+const adminOctokit = ADMIN_TOKEN
+  ? new MyOctoKit({
+      auth: ADMIN_TOKEN,
+      log: {
+        debug: core.debug,
+        info: core.info,
+        warn: core.warning,
+        error: core.error,
+      },
+    })
+  : null;
 
 const owner = process.env.GITHUB_REPOSITORY_OWNER ?? "";
 const repo = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "";
@@ -170,12 +183,92 @@ export async function sendPR(
 
       core.setOutput("updated", true);
       core.setOutput("pr_url", PR.data.html_url);
+      core.setOutput("method_used", "pull_request");
     } else {
       core.error(`Failed to create PR because of PR object`);
       core.setOutput("updated", false);
     }
   } catch (error) {
     core.error(`Failed to create PR: ${error}`);
+  }
+}
+
+async function pushDirectlyWithPAT(
+  updatedCodeJSON: CodeJSON,
+  baseBranchName: string,
+): Promise<boolean> {
+  if (!adminOctokit) {
+    core.error("Admin token not provided for direct push");
+    return false;
+  }
+
+  try {
+    const formattedContent = JSON.stringify(updatedCodeJSON, null, 2);
+
+    let currentFileSha: string | undefined;
+    try {
+      const currentFile = await adminOctokit.rest.repos.getContent({
+        owner,
+        repo,
+        path: "code.json",
+        ref: baseBranchName,
+      });
+
+      if ("sha" in currentFile.data) {
+        currentFileSha = currentFile.data.sha;
+      }
+    } catch (error) {
+      core.info("code.json doesn't exist yet, will create new file");
+    }
+
+    const result = await adminOctokit.rest.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path: "code.json",
+      message: "Update code.json metadata",
+      content: Buffer.from(formattedContent).toString("base64"),
+      branch: baseBranchName,
+      sha: currentFileSha,
+    });
+
+    core.info(`Successfully pushed commit with PAT: ${result.data.commit.sha}`);
+
+    core.setOutput("updated", true);
+    core.setOutput("commit_sha", result.data.commit.sha);
+    core.setOutput("method_used", "direct_push");
+    return true;
+  } catch (error) {
+    core.error(`Failed to push directly with PAT: ${error}`);
+    return false;
+  }
+}
+
+export async function pushDirectlyWithFallback(
+  updatedCodeJSON: CodeJSON,
+  baseBranchName: string,
+) {
+  if (!ADMIN_TOKEN) {
+    core.error(
+      "SKIP_PR is enabled but ADMIN_TOKEN is not provided. Direct push requires an admin PAT.",
+    );
+    core.info("Falling back to creating a pull request");
+
+    await sendPR(updatedCodeJSON, baseBranchName);
+    return;
+  }
+
+  core.info("Attempting direct push with admin PAT!");
+
+  const directPushSuccess = await pushDirectlyWithPAT(
+    updatedCodeJSON,
+    baseBranchName,
+  );
+
+  if (!directPushSuccess) {
+    core.info(
+      "Direct push with PAT failed, falling back to creating a pull request",
+    );
+    await sendPR(updatedCodeJSON, baseBranchName);
   }
 }
 
