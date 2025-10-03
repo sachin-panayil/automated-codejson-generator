@@ -63,6 +63,13 @@ Total number of contributors: <!--CONTRIBUTOR COUNT START--> 3 <!--CONTRIBUTOR C
                     <sub><b>Isaac Milarsky</b></sub>
                 </a>
             </td>
+            <td align="center">
+                <a href="https://github.com/mjburling">
+                    <img src="https://avatars.githubusercontent.com/u/905175?v=4" width="100;" alt="mjburling"/>
+                    <br />
+                    <sub><b>Michael J Burling</b></sub>
+                </a>
+            </td>
 		</tr>
 	<tbody>
 </table>
