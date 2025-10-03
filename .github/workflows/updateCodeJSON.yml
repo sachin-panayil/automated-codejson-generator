@@ -1,9 +1,8 @@
 name: Update Code.json
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - "code-json-*"
+  pull_request:
+    types: [opened, synchronize]
     paths:
       - "code.json"
 
