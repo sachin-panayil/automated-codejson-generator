@@ -3,7 +3,9 @@ import { z } from "zod";
 const DateSchema = z.object({
   created: z.string().min(1, "created date is required"),
   lastModified: z.string().min(1, "lastModified date is required"),
-  metaDataLastUpdated: z.string().min(1, "metaDataLastUpdated date is required"),
+  metaDataLastUpdated: z
+    .string()
+    .min(1, "metaDataLastUpdated date is required"),
 });
 
 const ContactSchema = z.object({
@@ -16,18 +18,17 @@ const LicenseSchema = z.object({
   URL: z.url("license URL must be valid").min(1, "license URL is required"),
 });
 
-const PermissionsSchema = z.object({
-  license: z.array(LicenseSchema).optional(),
-  licenses: z.array(LicenseSchema).optional(),
-  usageType: z.union([z.array(z.string()), z.string()]),
-  exemptionText: z.string(),
-}).refine(
-  (data) => data.license || data.licenses,
-  {
+const PermissionsSchema = z
+  .object({
+    license: z.array(LicenseSchema).optional(),
+    licenses: z.array(LicenseSchema).optional(),
+    usageType: z.union([z.array(z.string()), z.string()]),
+    exemptionText: z.string(),
+  })
+  .refine((data) => data.license || data.licenses, {
     message: "Either 'license' or 'licenses' array is required",
     path: ["license"],
-  }
-);
+  });
 
 const ReuseFrequencySchema = z.object({
   forks: z.number(),
@@ -58,7 +59,9 @@ export const CodeJSONSchema = z.object({
   status: z.string().min(1, "status is required"),
   permissions: PermissionsSchema,
   organization: z.string().min(1, "organization is required"),
-  repositoryURL: z.url("must be a valid URL").min(1, "repositoryURL is required"),
+  repositoryURL: z
+    .url("must be a valid URL")
+    .min(1, "repositoryURL is required"),
   repositoryHost: z.string(),
   repositoryVisibility: z.string().min(1, "repositoryVisibility is required"),
   homepageURL: z.string().optional(),
@@ -97,14 +100,14 @@ export const CodeJSONSchema = z.object({
 
 export function validateCodeJSON(codeJSON: any): string[] {
   const result = CodeJSONSchema.safeParse(codeJSON);
-  
+
   if (result.success) {
     return [];
   }
-  
+
   return result.error.issues.map((err: z.ZodIssue) => {
-    const path = err.path.join('.');
-    const field = path || 'root';
+    const path = err.path.join(".");
+    const field = path || "root";
     return `${field}: ${err.message}`;
   });
 }

@@ -121,15 +121,18 @@ async function getMetaData(
 export async function run(): Promise<void> {
   try {
     const eventName = process.env.GITHUB_EVENT_NAME;
+    const refName = process.env.GITHUB_REF;
     core.info(`Event name: ${eventName}`);
 
-    if (eventName === "pull_request") {
-      core.info("Detected pull_request event - validating only!");
+    if (eventName === "push" && refName?.startsWith("refs/heads/code-json-")) {
+      core.info("Detected push to PR branch - validating only!");
       await helpers.validateOnly();
       return;
     }
 
-    const currentCodeJSON = await helpers.readJSON("/github/workspace/code.json");
+    const currentCodeJSON = await helpers.readJSON(
+      "/github/workspace/code.json",
+    );
     const metaData = await getMetaData(currentCodeJSON);
     let finalCodeJSON = {} as CodeJSON;
 
@@ -150,7 +153,7 @@ export async function run(): Promise<void> {
     const validationErrors = helpers.validateCodeJSON(finalCodeJSON);
 
     if (validationErrors.length > 0) {
-      const errorMessage = `Generated code.json is invalid:\n\n${validationErrors.map((err, idx) => `${idx + 1}. ${err}`).join('\n')}`;
+      const errorMessage = `Generated code.json is invalid:\n\n${validationErrors.map((err, idx) => `${idx + 1}. ${err}`).join("\n")}`;
       core.setFailed(errorMessage);
       return;
     }
