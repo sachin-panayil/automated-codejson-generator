@@ -48,7 +48,7 @@ method_used:
 This approach tries to push directly to the branch using a Personal Access Token, but falls back to creating a pull request if the direct push fails.
 
 ```yaml
-name: Update Code.json (Smart Mode)
+name: Update Code.json
 on:
   schedule:
     - cron: 0 0 1 * * # First day of every month
