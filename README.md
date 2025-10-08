@@ -46,7 +46,7 @@ method_used:
 
 ## Workflow Examples
 
-### Option 1: Direct Push 
+### Option 1: Direct Push
 
 This approach tries to push directly to the branch using a Personal Access Token, but falls back to creating a pull request if the direct push fails. When users need to edit code.json, they should create a PR which will automatically validate their changes.
 
@@ -59,7 +59,7 @@ on:
   pull_request:
     types: [opened, synchronize]
     paths:
-      - 'code.json'
+      - "code.json"
 
 permissions:
   contents: write
@@ -80,7 +80,7 @@ jobs:
         uses: DSACMS/automated-codejson-generator@v1.2.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ADMIN_TOKEN: ${{ secrets.ADMIN_PAT }}  # PAT with admin/push permissions
+          ADMIN_TOKEN: ${{ secrets.ADMIN_PAT }} # PAT with admin/push permissions
           BRANCH: "main"
           SKIP_PR: "true"
 
@@ -107,7 +107,7 @@ on:
   pull_request:
     types: [opened, synchronize]
     paths:
-      - 'code.json'
+      - "code.json"
 
 permissions:
   contents: write
@@ -128,17 +128,19 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: "main"
-          SKIP_PR: "false" 
+          SKIP_PR: "false"
 ```
 
 ### How It Works
 
 **Automatic Generation**
+
 - The action calculates metadata, validates it, and creates a PR or pushes directly
 - Validation ensures only valid code.json is created
 - Users can then fill in manual fields by editing the PR
 
 **PR Validation**
+
 - When users edit code.json in a PR, validation runs automatically on every commit
 - The PR cannot be merged if validation fails (when branch protection is enabled)
 - Error messages help users fix issues quickly
@@ -158,7 +160,7 @@ To use the direct push functionality, you'll need to create a Personal Access To
 5. **Configure Token**:
    - **Name**: Give it a name like "code.json Generator"
    - **Expiration**: Set appropriate expiration (recommend 90 days or 1 year)
-   - **Scopes**: 
+   - **Scopes**:
      - Select `repo` (full repository access)
 6. **Store Token**: Copy and paste your token and store it for the next part
 
@@ -197,7 +199,7 @@ The automated code.json generator calculates specific fields by analyzing your r
 
 **dateLastModified**: This uses your repository's last update timestamp, reflecting the most recent changes. No configuration needed.
 
-**dateMetaDataLastUpdated**: The generator sets this to the current timestamp each time it runs, providing a record of when the metadata was last refreshed. No configuration needed.
+**dateMetadataLastUpdated**: The generator sets this to the current timestamp each time it runs, providing a record of when the metadata was last refreshed. No configuration needed.
 
 **feedbackMechanism**: The repository's issues URL in the format of {repositoryURL}/issues. If you already have a code.json file with existing feedback mechanisms, the generator preserves those values. No configuration needed.
 

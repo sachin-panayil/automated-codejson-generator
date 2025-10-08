@@ -67,7 +67,7 @@ export async function calculateMetaData(): Promise<Partial<CodeJSON>> {
       date: {
         created: basicInfo.date.created,
         lastModified: basicInfo.date.lastModified,
-        metaDataLastUpdated: basicInfo.date.metaDataLastUpdated,
+        metadataLastUpdated: basicInfo.date.metadataLastUpdated,
       },
     };
   } catch (error) {
@@ -100,7 +100,7 @@ async function getBasicInfo(): Promise<BasicRepoInfo> {
       date: {
         created: repoData.data.created_at,
         lastModified: repoData.data.updated_at,
-        metaDataLastUpdated: new Date().toISOString(),
+        metadataLastUpdated: new Date().toISOString(),
       },
     };
   } catch (error) {

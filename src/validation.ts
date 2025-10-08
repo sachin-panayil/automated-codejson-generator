@@ -3,9 +3,9 @@ import { z } from "zod";
 const DateSchema = z.object({
   created: z.string().min(1, "created date is required"),
   lastModified: z.string().min(1, "lastModified date is required"),
-  metaDataLastUpdated: z
+  metadataLastUpdated: z
     .string()
-    .min(1, "metaDataLastUpdated date is required"),
+    .min(1, "metadataLastUpdated date is required"),
 });
 
 const ContactSchema = z.object({
@@ -20,15 +20,31 @@ const LicenseSchema = z.object({
 
 const PermissionsSchema = z
   .object({
-    license: z.array(LicenseSchema).optional(),
-    licenses: z.array(LicenseSchema).optional(),
+    licenses: z.array(LicenseSchema).min(1, "at least one license is required"),
     usageType: z.union([z.array(z.string()), z.string()]),
     exemptionText: z.string(),
   })
-  .refine((data) => data.license || data.licenses, {
-    message: "Either 'license' or 'licenses' array is required",
-    path: ["license"],
-  });
+  .refine(
+    (data) => {
+      const usageTypes = Array.isArray(data.usageType)
+        ? data.usageType
+        : [data.usageType];
+
+      const hasExemption = usageTypes.some(
+        (type) => typeof type === "string" && type.startsWith("exemptBy"),
+      );
+
+      if (hasExemption) {
+        return data.exemptionText && data.exemptionText.trim().length > 0;
+      }
+
+      return true;
+    },
+    {
+      message: "exemptionText is required when usageType contains an exemption",
+      path: ["exemptionText"],
+    },
+  );
 
 const ReuseFrequencySchema = z.object({
   forks: z.number(),

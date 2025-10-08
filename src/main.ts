@@ -9,7 +9,7 @@ const baselineCodeJSON: CodeJSON = {
   longDescription: "",
   status: "",
   permissions: {
-    license: [
+    licenses: [
       {
         name: "",
         URL: "",
@@ -45,7 +45,7 @@ const baselineCodeJSON: CodeJSON = {
   date: {
     created: "",
     lastModified: "",
-    metaDataLastUpdated: "",
+    metadataLastUpdated: "",
   },
   tags: [],
   contact: {
@@ -110,8 +110,8 @@ async function getMetaData(
     date: {
       created: partialCodeJSON.date?.created ?? "",
       lastModified: partialCodeJSON.date?.lastModified ?? "",
-      metaDataLastUpdated:
-        partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
+      metadataLastUpdated:
+        partialCodeJSON.date?.metadataLastUpdated ?? new Date().toISOString(),
     },
     feedbackMechanism,
     SBOM,
