@@ -36,7 +36,7 @@ Scripting
 | approver | approve accepting contributions                | highly experienced and active reviewer + contributor to a sub-project             | MAINTAINERS file approver entry and GitHub Triage Team      |
 | lead     | set direction and priorities for a sub-project | demonstrated responsibility and excellent technical judgement for the sub-project | MAINTAINERS file owner entry and GitHub Org Admin Team      |
 
-Total number of contributors: <!--CONTRIBUTOR COUNT START--> 3 <!--CONTRIBUTOR COUNT END-->
+Total number of contributors: <!--CONTRIBUTOR COUNT START--> 4 <!--CONTRIBUTOR COUNT END-->
 
 <!-- readme: contributors -start -->
 <table>
@@ -61,6 +61,13 @@ Total number of contributors: <!--CONTRIBUTOR COUNT START--> 3 <!--CONTRIBUTOR C
                     <img src="https://avatars.githubusercontent.com/u/24639268?v=4" width="100;" alt="IsaacMilarky"/>
                     <br />
                     <sub><b>Isaac Milarsky</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/mjburling">
+                    <img src="https://avatars.githubusercontent.com/u/905175?v=4" width="100;" alt="mjburling"/>
+                    <br />
+                    <sub><b>Michael J Burling</b></sub>
                 </a>
             </td>
 		</tr>
