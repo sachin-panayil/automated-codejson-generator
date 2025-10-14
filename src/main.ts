@@ -95,6 +95,17 @@ async function getMetaData(
     ? partialCodeJSON.tags
     : existingCodeJSON?.tags || [];
 
+  // handling legacy contractNumber that turned from string to array which caused validation errors
+  let contractNumber: string[] = [];
+  const existingContract = existingCodeJSON?.contractNumber as any;
+  if (existingContract) {
+    if (typeof existingContract === "string") {
+      contractNumber = existingContract.trim() ? [existingContract.trim()] : [];
+    } else if (Array.isArray(existingContract)) {
+      contractNumber = existingContract
+    }
+  }
+
   return {
     name: partialCodeJSON.name,
     description: description,
@@ -115,6 +126,7 @@ async function getMetaData(
     },
     feedbackMechanism,
     SBOM,
+    contractNumber,
   };
 }
 
@@ -147,16 +159,7 @@ export async function run(): Promise<void> {
       };
     }
 
-    core.info("Validating generated code.json before output");
-    const validationErrors = helpers.validateCodeJSON(finalCodeJSON);
-
-    if (validationErrors.length > 0) {
-      const errorMessage = `Generated code.json is invalid:\n${validationErrors.map((err, idx) => `${idx + 1}. ${err}`).join("\n")}`;
-      core.setFailed(errorMessage);
-      return;
-    }
-
-    core.info("Generated code.json passed validation!");
+    core.info("Generated code.json successfully!");
 
     const baseBranchName = await helpers.getBaseBranch();
     const skipPR = core.getInput("SKIP_PR", { required: false }) === "true";

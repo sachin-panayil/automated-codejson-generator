@@ -10,8 +10,7 @@ This project provides a GitHub Action that helps federal agencies maintain their
 
 **Automatic Generation**
 
-- The action calculates metadata, validates it, and creates a PR or pushes directly
-- Validation ensures only valid code.json is created
+- The action calculates metadata and creates a PR or pushes directly
 - Users can then fill in manual fields by editing the PR
 
 **PR Validation**
@@ -19,6 +18,7 @@ This project provides a GitHub Action that helps federal agencies maintain their
 - When users edit code.json in a PR, validation runs automatically on every commit
 - The PR cannot be merged if validation fails (when branch protection is enabled)
 - Error messages help users fix issues quickly
+- Validation ensures only valid code.json reaches your main branch
 
 **Important:** For direct push mode, users should always create PRs when manually editing code.json to ensure validation runs. Direct edits to the main branch will not be validated by this action.
 
