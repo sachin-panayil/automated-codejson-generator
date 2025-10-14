@@ -48,7 +48,7 @@ method_used:
 
 ### Option 1: Direct Push
 
-This approach tries to push directly to the branch using a Personal Access Token, but falls back to creating a pull request if the direct push fails. When users need to edit code.json, they should create a PR which will automatically validate their changes.
+This approach tries to push directly to the branch using a Personal Access Token, but falls back to creating a pull request if the direct push fails. When users need to edit code.json, they should create a PR which will automatically validate their changes. Refer to this [section] of the README(https://github.com/DSACMS/automated-codejson-generator?tab=readme-ov-file#setting-up-personal-access-token-pat) for a guide to create the needed Personal Access Token.
 
 ```yaml
 name: Update Code.json
