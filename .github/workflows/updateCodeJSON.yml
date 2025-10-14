@@ -1,6 +1,12 @@
 name: Update Code.json
 on:
+  schedule:
+    - cron: 0 0 1 * * # First day of every month
   workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "code.json"
 
 permissions:
   contents: write
@@ -17,12 +23,19 @@ jobs:
           fetch-depth: 0
 
       - name: Update code.json
-        id: generator
-        uses: DSACMS/automated-codejson-generator@v1.1.0
+        id: update
+        uses: DSACMS/automated-codejson-generator@v1.2.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_PAT }} # PAT with admin/push permissions
+          BRANCH: "main"
+          SKIP_PR: "true"
 
-      - name: Print outputs
+      - name: Report update method
         run: |
-          echo "Your code.json has been updated: ${{steps.generator.outputs.updated}}"
-          echo "Pull Request Link: ${{steps.generator.outputs.pr_url}}"
+          echo "Update successful: ${{ steps.update.outputs.updated }}"
+          if [ "${{ steps.update.outputs.method_used }}" = "direct_push" ]; then
+            echo "Direct push successful! Commit SHA: ${{ steps.update.outputs.commit_sha }}"
+          elif [ "${{ steps.update.outputs.method_used }}" = "pull_request" ]; then
+            echo "Created pull request: ${{ steps.update.outputs.pr_url }}"
+          fi
