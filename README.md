@@ -136,6 +136,7 @@ To use the direct push functionality, you'll need to create a Personal Access To
    - **Scopes**: 
      - For classic tokens: Select `repo` (full repository access)
      - For fine-grained tokens: Select `Contents` (write) and `Metadata` (read)
+6. **Copy the generated token**: Copy the token and keep it handy for the next section
 
 ### Adding PAT to Repository
 
@@ -144,7 +145,7 @@ To use the direct push functionality, you'll need to create a Personal Access To
 3. **New Secret**: Click "New repository secret"
 4. **Configure Secret**:
    - **Name**: `ADMIN_PAT`
-   - **Value**: Paste your Personal Access Token
+   - **Value**: Paste your Personal Access Token that you copied from the previous section
 5. **Save**: Click "Add secret"
 
 ⚠️ _Please make sure the following are enabled within your Repository Action Settings in order to work properly_ ⚠️
