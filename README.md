@@ -6,43 +6,21 @@ A GitHub Action that automatically generates and maintains code.json files for f
 
 This project provides a GitHub Action that helps federal agencies maintain their code.json files, which are required for compliance with the Federal Source Code Policy. The action automatically calculates and updates various metadata fields including labor hours, programming languages used, repository information, and timestamps. It can either create pull requests or push directly to branches (with appropriate permissions), making it easier to keep code.json files accurate and up-to-date.
 
-## Inputs
+## How It Works
 
-```yaml
-GITHUB_TOKEN:
-  description: "GitHub token used for API access and PR creation"
-  required: true
-  default: ${{ github.token }}
+**Automatic Generation**
 
-BRANCH:
-  description: "Name of the branch to update"
-  required: false
+- The action calculates metadata, validates it, and creates a PR or pushes directly
+- Validation ensures only valid code.json is created
+- Users can then fill in manual fields by editing the PR
 
-SKIP_PR:
-  description: "Try to push directly to branch first, fallback to PR if it fails. Requires ADMIN_TOKEN."
-  required: false
-  default: "false"
+**PR Validation**
 
-ADMIN_TOKEN:
-  description: "Personal Access Token with admin/write privileges for direct push. Required when SKIP_PR is true."
-  required: false
-```
+- When users edit code.json in a PR, validation runs automatically on every commit
+- The PR cannot be merged if validation fails (when branch protection is enabled)
+- Error messages help users fix issues quickly
 
-## Outputs
-
-```yaml
-updated:
-  description: "Boolean indicating whether code.json was updated"
-
-pr_url:
-  description: "URL of the created pull request if changes were made via PR"
-
-commit_sha:
-  description: "SHA of the commit if pushed directly to branch"
-
-method_used:
-  description: "Method used for the update: 'direct_push' or 'pull_request'"
-```
+**Important:** For direct push mode, users should always create PRs when manually editing code.json to ensure validation runs. Direct edits to the main branch will not be validated by this action.
 
 ## Workflow Examples
 
@@ -131,21 +109,43 @@ jobs:
           SKIP_PR: "false"
 ```
 
-### How It Works
+### Inputs
 
-**Automatic Generation**
+```yaml
+GITHUB_TOKEN:
+  description: "GitHub token used for API access and PR creation"
+  required: true
+  default: ${{ github.token }}
 
-- The action calculates metadata, validates it, and creates a PR or pushes directly
-- Validation ensures only valid code.json is created
-- Users can then fill in manual fields by editing the PR
+BRANCH:
+  description: "Name of the branch to update"
+  required: false
 
-**PR Validation**
+SKIP_PR:
+  description: "Try to push directly to branch first, fallback to PR if it fails. Requires ADMIN_TOKEN."
+  required: false
+  default: "false"
 
-- When users edit code.json in a PR, validation runs automatically on every commit
-- The PR cannot be merged if validation fails (when branch protection is enabled)
-- Error messages help users fix issues quickly
+ADMIN_TOKEN:
+  description: "Personal Access Token with admin/write privileges for direct push. Required when SKIP_PR is true."
+  required: false
+```
 
-**Important:** For direct push mode, users should always create PRs when manually editing code.json to ensure validation runs. Direct edits to the main branch will not be validated by this action.
+### Outputs
+
+```yaml
+updated:
+  description: "Boolean indicating whether code.json was updated"
+
+pr_url:
+  description: "URL of the created pull request if changes were made via PR"
+
+commit_sha:
+  description: "SHA of the commit if pushed directly to branch"
+
+method_used:
+  description: "Method used for the update: 'direct_push' or 'pull_request'"
+```
 
 ## Setting Up Personal Access Token (PAT)
 
