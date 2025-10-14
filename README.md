@@ -28,6 +28,28 @@ This project provides a GitHub Action that helps federal agencies maintain their
 
 This approach tries to push directly to the branch using a Personal Access Token, but falls back to creating a pull request if the direct push fails. When users need to edit code.json, they should create a PR which will automatically validate their changes. Refer to this [section](https://github.com/DSACMS/automated-codejson-generator?tab=readme-ov-file#setting-up-personal-access-token-pat) for a guide to create the necessary Personal Access Token.
 
+#### Direct Push Mode Limitations
+
+**Important:** Direct push mode (`SKIP_PR: "true"`) will fall back to creating a pull request if:
+- Branch protection rules are enabled on the target branch
+- The PAT doesn't have sufficient permissions
+- Any other push restriction exists
+
+This is expected behavior. If you need all updates to go through pull requests, use `SKIP_PR: "false"`.
+
+##### When Direct Push Works
+- No branch protection on target branch
+- PAT has write access
+- No other repository restrictions
+
+##### When It Falls Back to PR
+- Branch protection enabled (including admin enforcement)
+- Required status checks
+- Required pull request reviews
+- Any push restrictions
+
+**Recommendation:** For repositories with branch protection, use `SKIP_PR: "false"` to always create pull requests.
+
 ```yaml
 name: Update Code.json
 on:

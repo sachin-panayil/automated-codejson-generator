@@ -163,7 +163,6 @@ export async function validateOnly(): Promise<void> {
     }
 
     core.info("code.json is valid!");
-    core.setOutput("validated", true);
   } catch (error) {
     core.setFailed(`validation error: ${error}`);
   }
