@@ -23,7 +23,7 @@
   "disclaimerURL": "",
   "disclaimerText": "",
   "vcs": "git",
-  "laborHours": "1234",
+  "laborHours": 1234,
   "reuseFrequency": {
     "forks": 0,
     "clones": 0
