@@ -25,7 +25,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          CURRENT=$(perl -ne 'print $1 if /<!--CONTRIBUTOR COUNT START-->\s*(\d+)/' MAINTAINERS.md)
+          CURRENT=$(perl -ne 'print $1 if /<!--CONTRIBUTOR COUNT START-->\s*(\d+)/' COMMUNITY.md)
           
           ACTUAL=$(gh api "/repos/$GITHUB_REPOSITORY/contributors?per_page=100" | \
             jq '[.[] | select(.type != "Bot" and (.login | test("\\[bot\\]$") | not) and (.login | test("-bot$") | not))] | length')
@@ -45,7 +45,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          readme_path: MAINTAINERS.md
+          readme_path: COMMUNITY.md
           use_username: false
           commit_message: "update contributors information"
 
