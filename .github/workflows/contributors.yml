@@ -17,8 +17,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Check if update needed
         id: check
@@ -26,7 +24,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           CURRENT=$(perl -ne 'print $1 if /<!--CONTRIBUTOR COUNT START-->\s*(\d+)/' COMMUNITY.md)
-          
           ACTUAL=$(gh api "/repos/$GITHUB_REPOSITORY/contributors?per_page=100" | \
             jq '[.[] | select(.type != "Bot" and (.login | test("\\[bot\\]$") | not) and (.login | test("-bot$") | not))] | length')
           
@@ -39,7 +36,7 @@ jobs:
             echo "needs_update=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update contributor list
+      - name: Update contributors
         if: steps.check.outputs.needs_update == 'true'
         uses: akhilmhdh/contributors-readme-action@v2.3.10
         env:
@@ -48,12 +45,12 @@ jobs:
           readme_path: COMMUNITY.md
           use_username: false
           commit_message: "update contributors information"
+          auto_detect_branch_protection: true
 
-      - name: Update contributor count
+      - name: Update count
         if: steps.check.outputs.needs_update == 'true'
         run: |
-          COUNT="${{ steps.check.outputs.count }}"
-          perl -i -pe 's/(<!--CONTRIBUTOR COUNT START-->).*?(<!--CONTRIBUTOR COUNT END-->)/$1 '"$COUNT"' $2/' COMMUNITY.md
+          perl -i -pe 's/(<!--CONTRIBUTOR COUNT START-->).*?(<!--CONTRIBUTOR COUNT END-->)/$1 ${{ steps.check.outputs.count }} $2/' COMMUNITY.md
 
       - name: Create Pull Request
         if: steps.check.outputs.needs_update == 'true'
@@ -63,9 +60,9 @@ jobs:
           commit-message: "docs: update contributors (count: ${{ steps.check.outputs.count }})"
           title: "docs: update contributors information"
           body: |
-            Automated contributor update - new contributor detected!
+            🎉 New contributor detected!
             
-            Updated count: ${{ steps.check.outputs.count }}
+            **Updated count:** ${{ steps.check.outputs.count }}
           branch: update-contributors
           delete-branch: true
           labels: documentation
