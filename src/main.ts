@@ -1,7 +1,6 @@
 import * as core from "@actions/core";
 import { CodeJSON } from "./model.js";
 import * as helpers from "./helper.js";
-import { stripOutdatedFields } from "./validation.js";
 
 const baselineCodeJSON: CodeJSON = {
   name: "",
@@ -66,6 +65,21 @@ const baselineCodeJSON: CodeJSON = {
   userType: [],
   maturityModelTier: 0,
 };
+
+function filterValidFields(existingCodeJSON: any): Partial<CodeJSON> {
+  const validKeys = new Set(Object.keys(baselineCodeJSON));
+  const filtered: any = {};
+
+  for (const key of Object.keys(existingCodeJSON)) {
+    if (validKeys.has(key)) {
+      filtered[key] = existingCodeJSON[key];
+    } else {
+      core.info(`Removing outdated field from current code.json: ${key}`);
+    }
+  }
+
+  return filtered as Partial<CodeJSON>;
+}
 
 async function getMetaData(
   existingCodeJSON?: CodeJSON | null,
@@ -148,9 +162,12 @@ export async function run(): Promise<void> {
     let finalCodeJSON = {} as CodeJSON;
 
     if (currentCodeJSON) {
+      // filter out outdated fields before merging
+      const filteredExisting = filterValidFields(currentCodeJSON);
+      
       finalCodeJSON = {
         ...baselineCodeJSON,
-        ...currentCodeJSON,
+        ...filteredExisting,
         ...metaData,
       };
     } else {
@@ -159,8 +176,6 @@ export async function run(): Promise<void> {
         ...metaData,
       };
     }
-
-    finalCodeJSON = stripOutdatedFields(finalCodeJSON)
 
     core.info("Generated code.json successfully!");
 

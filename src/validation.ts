@@ -127,11 +127,3 @@ export function validateCodeJSON(codeJSON: any): string[] {
     return `${field}: ${err.message}`;
   });
 }
-
-export function stripOutdatedFields(codeJSON: any): any {
-  try {
-    return CodeJSONSchema.loose().parse(codeJSON)
-  } catch (error) {
-    return codeJSON
-  }
-}
