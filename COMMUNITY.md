@@ -60,26 +60,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on the release process.
 Total number of contributors: <!--CONTRIBUTOR COUNT START--> <!--CONTRIBUTOR COUNT END-->
 
 <!-- readme: contributors -start -->
-<table>
-	<tbody>
-		<tr>
-            <td align="center">
-                <a href="https://github.com/sachin-panayil">
-                    <img src="https://avatars.githubusercontent.com/u/79382140?v=4" width="100;" alt="sachin-panayil"/>
-                    <br />
-                    <sub><b>Sachin Panayil</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/IsaacMilarky">
-                    <img src="https://avatars.githubusercontent.com/u/24639268?v=4" width="100;" alt="IsaacMilarky"/>
-                    <br />
-                    <sub><b>Isaac Milarsky</b></sub>
-                </a>
-            </td>
-		</tr>
-	<tbody>
-</table>
+
 <!-- readme: contributors -end -->
 
 <!--
