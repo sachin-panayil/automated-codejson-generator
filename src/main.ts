@@ -9,7 +9,7 @@ const baselineCodeJSON: CodeJSON = {
   longDescription: "",
   status: "",
   permissions: {
-    license: [
+    licenses: [
       {
         name: "",
         URL: "",
@@ -45,7 +45,7 @@ const baselineCodeJSON: CodeJSON = {
   date: {
     created: "",
     lastModified: "",
-    metaDataLastUpdated: "",
+    metadataLastUpdated: "",
   },
   tags: [],
   contact: {
@@ -65,6 +65,21 @@ const baselineCodeJSON: CodeJSON = {
   userType: [],
   maturityModelTier: 0,
 };
+
+function filterValidFields(existingCodeJSON: any): Partial<CodeJSON> {
+  const validKeys = new Set(Object.keys(baselineCodeJSON));
+  const filtered: any = {};
+
+  for (const key of Object.keys(existingCodeJSON)) {
+    if (validKeys.has(key)) {
+      filtered[key] = existingCodeJSON[key];
+    } else {
+      core.info(`Removing outdated field from current code.json: ${key}`);
+    }
+  }
+
+  return filtered as Partial<CodeJSON>;
+}
 
 async function getMetaData(
   existingCodeJSON?: CodeJSON | null,
@@ -95,6 +110,17 @@ async function getMetaData(
     ? partialCodeJSON.tags
     : existingCodeJSON?.tags || [];
 
+  // handling legacy contractNumber that turned from string to array which caused validation errors
+  let contractNumber: string[] = [];
+  const existingContract = existingCodeJSON?.contractNumber as any;
+  if (existingContract) {
+    if (typeof existingContract === "string") {
+      contractNumber = existingContract.trim() ? [existingContract.trim()] : [];
+    } else if (Array.isArray(existingContract)) {
+      contractNumber = existingContract
+    }
+  }
+
   return {
     name: partialCodeJSON.name,
     description: description,
@@ -110,51 +136,71 @@ async function getMetaData(
     date: {
       created: partialCodeJSON.date?.created ?? "",
       lastModified: partialCodeJSON.date?.lastModified ?? "",
-      metaDataLastUpdated:
-        partialCodeJSON.date?.metaDataLastUpdated ?? new Date().toISOString(),
+      metadataLastUpdated:
+        partialCodeJSON.date?.metadataLastUpdated ?? new Date().toISOString(),
     },
     feedbackMechanism,
     SBOM,
+    contractNumber,
   };
 }
 
 export async function run(): Promise<void> {
-  const currentCodeJSON = await helpers.readJSON("/github/workspace/code.json");
-  const metaData = await getMetaData(currentCodeJSON);
-  let finalCodeJSON = {} as CodeJSON;
+  try {
+    const eventName = process.env.GITHUB_EVENT_NAME;
 
-  if (currentCodeJSON) {
-    finalCodeJSON = {
-      ...baselineCodeJSON,
-      ...currentCodeJSON,
-      ...metaData,
-    };
-  } else {
-    finalCodeJSON = {
-      ...baselineCodeJSON,
-      ...metaData,
-    };
-  }
-
-  const baseBranchName = await helpers.getBaseBranch();
-  const skipPR = core.getInput("SKIP_PR", { required: false }) === "true";
-  const adminToken = core.getInput("ADMIN_TOKEN", { required: false });
-
-  if (skipPR) {
-    if (!adminToken) {
-      core.warning("SKIP_PR is enabled but ADMIN_TOKEN is not provided.");
-      core.warning(
-        "Direct push requires a Personal Access Token with appropriate permissions.",
-      );
-
-      core.info("Falling back to pull request creation");
-      await helpers.sendPR(finalCodeJSON, baseBranchName);
-    } else {
-      core.info("Attempting direct push");
-      await helpers.pushDirectlyWithFallback(finalCodeJSON, baseBranchName);
+    if (eventName === "pull_request") {
+      core.info("Detected pull_request event - validating only!");
+      await helpers.validateOnly();
+      return;
     }
-  } else {
-    core.info("Attempting pull request creation");
-    await helpers.sendPR(finalCodeJSON, baseBranchName);
+
+    const currentCodeJSON = await helpers.readJSON(
+      "/github/workspace/code.json",
+    );
+    const metaData = await getMetaData(currentCodeJSON);
+    let finalCodeJSON = {} as CodeJSON;
+
+    if (currentCodeJSON) {
+      // filter out outdated fields before merging
+      const filteredExisting = filterValidFields(currentCodeJSON);
+      
+      finalCodeJSON = {
+        ...baselineCodeJSON,
+        ...filteredExisting,
+        ...metaData,
+      };
+    } else {
+      finalCodeJSON = {
+        ...baselineCodeJSON,
+        ...metaData,
+      };
+    }
+
+    core.info("Generated code.json successfully!");
+
+    const baseBranchName = await helpers.getBaseBranch();
+    const skipPR = core.getInput("SKIP_PR", { required: false }) === "true";
+    const adminToken = core.getInput("ADMIN_TOKEN", { required: false });
+
+    if (skipPR) {
+      if (!adminToken) {
+        core.warning("SKIP_PR is enabled but ADMIN_TOKEN is not provided.");
+        core.warning(
+          "Direct push requires a Personal Access Token with appropriate permissions.",
+        );
+
+        core.info("Falling back to pull request creation");
+        await helpers.sendPR(finalCodeJSON, baseBranchName);
+      } else {
+        core.info("Attempting direct push to branch");
+        await helpers.pushDirectlyWithFallback(finalCodeJSON, baseBranchName);
+      }
+    } else {
+      core.info("Creating pull request with updated code.json");
+      await helpers.sendPR(finalCodeJSON, baseBranchName);
+    }
+  } catch (error) {
+    core.setFailed(`Action failed: ${error}`);
   }
 }

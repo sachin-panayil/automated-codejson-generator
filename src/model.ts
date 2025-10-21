@@ -49,7 +49,7 @@ export interface ReuseFrequency {
 }
 
 export interface Permissions {
-  license: License[];
+  licenses: License[];
   usageType: string[];
   exemptionText: string;
 }
@@ -78,7 +78,7 @@ export interface Partner {
 export interface Date {
   created: string;
   lastModified: string;
-  metaDataLastUpdated: string;
+  metadataLastUpdated: string;
 }
 
 export interface Contact {

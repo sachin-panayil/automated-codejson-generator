@@ -6,7 +6,130 @@ A GitHub Action that automatically generates and maintains code.json files for f
 
 This project provides a GitHub Action that helps federal agencies maintain their code.json files, which are required for compliance with the Federal Source Code Policy. The action automatically calculates and updates various metadata fields including labor hours, programming languages used, repository information, and timestamps. It can either create pull requests or push directly to branches (with appropriate permissions), making it easier to keep code.json files accurate and up-to-date.
 
-## Inputs
+## How It Works
+
+**Automatic Generation**
+
+- The action calculates metadata and creates a PR or pushes directly
+- Users can then fill in manual fields by editing the PR
+
+**PR Validation**
+
+- When users edit code.json in a PR, validation runs automatically on every commit
+- The PR cannot be merged if validation fails (when branch protection is enabled)
+- Error messages help users fix issues quickly
+- Validation ensures only valid code.json reaches your main branch
+
+**Important:** For direct push mode, users should always create PRs when manually editing code.json to ensure validation runs. Direct edits to the main branch will not be validated by this action.
+
+## Workflow Examples
+
+### Option 1: Direct Push
+
+This approach tries to push directly to the branch using a Personal Access Token, but falls back to creating a pull request if the direct push fails. When users need to edit code.json, they should create a PR which will automatically validate their changes. Refer to this [section](https://github.com/DSACMS/automated-codejson-generator?tab=readme-ov-file#setting-up-personal-access-token-pat) for a guide to create the necessary Personal Access Token.
+
+#### Direct Push Mode Limitations
+
+**Important:** Direct push mode (`SKIP_PR: "true"`) will fall back to creating a pull request if:
+- Branch protection rules are enabled on the target branch
+- The PAT doesn't have sufficient permissions
+- Any other push restriction exists
+
+This is expected behavior. If you need all updates to go through pull requests, use `SKIP_PR: "false"`.
+
+##### When Direct Push Works
+- No branch protection on target branch
+- PAT has write access
+- No other repository restrictions
+
+##### When It Falls Back to PR
+- Any branch protection enabled 
+- Any push restrictions
+
+**Recommendation:** For repositories with branch protection, use `SKIP_PR: "false"` to always create pull requests.
+
+```yaml
+name: Update Code.json
+on:
+  schedule:
+    - cron: 0 0 1 * * # First day of every month
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "code.json"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  update-code-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update code.json
+        id: update
+        uses: DSACMS/automated-codejson-generator@v1.2.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_PAT }} # PAT with admin/push permissions
+          BRANCH: "main"
+          SKIP_PR: "true"
+
+      - name: Report update method
+        run: |
+          echo "Update successful: ${{ steps.update.outputs.updated }}"
+          if [ "${{ steps.update.outputs.method_used }}" = "direct_push" ]; then
+            echo "Direct push successful! Commit SHA: ${{ steps.update.outputs.commit_sha }}"
+          elif [ "${{ steps.update.outputs.method_used }}" = "pull_request" ]; then
+            echo "Created pull request: ${{ steps.update.outputs.pr_url }}"
+          fi
+```
+
+### Option 2: Pull Request Only
+
+This approach always creates a pull request for both automatic generation and validation of manual edits, ensuring code review for all changes.
+
+```yaml
+name: Update Code.json
+on:
+  schedule:
+    - cron: 0 0 1 * * # First day of every month
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "code.json"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  update-code-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update code.json
+        uses: DSACMS/automated-codejson-generator@v1.2.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: "main"
+          SKIP_PR: "false"
+```
+
+### Inputs
 
 ```yaml
 GITHUB_TOKEN:
@@ -28,96 +151,20 @@ ADMIN_TOKEN:
   required: false
 ```
 
-## Outputs
+### Outputs
 
 ```yaml
 updated:
   description: "Boolean indicating whether code.json was updated"
+
 pr_url:
   description: "URL of the created pull request if changes were made via PR"
+
 commit_sha:
   description: "SHA of the commit if pushed directly to branch"
+
 method_used:
   description: "Method used for the update: 'direct_push' or 'pull_request'"
-```
-
-## Workflow Examples
-
-### Option 1: Direct Push
-
-This approach tries to push directly to the branch using a Personal Access Token, but falls back to creating a pull request if the direct push fails.
-
-```yaml
-name: Update Code.json
-on:
-  schedule:
-    - cron: 0 0 1 * * # First day of every month
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-
-jobs:
-  update-code-json:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Update code.json
-        id: update
-        uses: DSACMS/automated-codejson-generator@v1.2.0
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ADMIN_TOKEN: ${{ secrets.ADMIN_PAT }}  # PAT with admin/push permissions
-          BRANCH: "main"
-          SKIP_PR: "true"
-
-      - name: Report update method
-        run: |
-          echo "Update successful: ${{ steps.update.outputs.updated }}"
-          if [ "${{ steps.update.outputs.method_used }}" = "direct_push" ]; then
-            echo "Direct push successful! Commit SHA: ${{ steps.update.outputs.commit_sha }}"
-          elif [ "${{ steps.update.outputs.method_used }}" = "pull_request" ]; then
-            echo "Created pull request: ${{ steps.update.outputs.pr_url }}"
-          fi
-```
-
-### Option 2: Pull Request Only
-
-This approach always creates a pull request, ensuring code review for all changes.
-
-```yaml
-name: Update Code.json
-on:
-  schedule:
-    - cron: 0 0 1 * * # First day of every month
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-
-jobs:
-  update-code-json:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Update code.json
-        uses: DSACMS/automated-codejson-generator@latest
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: "main"
-          SKIP_PR: "false" 
 ```
 
 ## Setting Up Personal Access Token (PAT)
@@ -128,10 +175,10 @@ To use the direct push functionality, you'll need to create a Personal Access To
 
 1. **Go to GitHub Settings**: Navigate to your GitHub account settings
 2. **Developer Settings**: Click on "Developer settings" in the left sidebar
-3. **Personal Access Tokens**: Choose "Tokens (classic)" or "Fine-grained tokens"
+3. **Personal Access Tokens**: Choose "Tokens (classic)"
 4. **Generate New Token**: Click "Generate new token"
 5. **Configure Token**:
-   - **Name**: Give it a descriptive name like "Code.json Generator"
+   - **Name**: Give it a name like "code.json Generator"
    - **Expiration**: Set appropriate expiration (recommend 90 days or 1 year)
    - **Scopes**: 
      - For classic tokens: Select `repo` (full repository access)
@@ -149,8 +196,7 @@ To use the direct push functionality, you'll need to create a Personal Access To
 5. **Save**: Click "Add secret"
 
 ⚠️ _Please make sure the following are enabled within your Repository Action Settings in order to work properly_ ⚠️
-<img width="789" height="361" alt="Screenshot 2025-08-05 at 1 44 36 PM" src="https://github.com/user-attachments/assets/3795dc0e-c4c4-4378-8eb2-b7b9d861c08a" />
-
+<img width="789" height="361" alt="Screenshot 2025-08-05 at 1 44 36 PM" src="https://github.com/user-attachments/assets/3795dc0e-c4c4-4378-8eb2-b7b9d861c08a" />
 
 ## Generation Context
 
@@ -174,7 +220,7 @@ The automated code.json generator calculates specific fields by analyzing your r
 
 **dateLastModified**: This uses your repository's last update timestamp, reflecting the most recent changes. No configuration needed.
 
-**dateMetaDataLastUpdated**: The generator sets this to the current timestamp each time it runs, providing a record of when the metadata was last refreshed. No configuration needed.
+**dateMetadataLastUpdated**: The generator sets this to the current timestamp each time it runs, providing a record of when the metadata was last refreshed. No configuration needed.
 
 **feedbackMechanism**: The repository's issues URL in the format of {repositoryURL}/issues. If you already have a code.json file with existing feedback mechanisms, the generator preserves those values. No configuration needed.
 
@@ -214,6 +260,7 @@ An up-to-date list of core team members can be found in [MAINTAINERS.md](MAINTAI
 .
 ├── src/
 │   ├── model.ts          # TypeScript interfaces for code.json schema
+│   ├── validation.ts     # Zod schema definitions and validation logic
 │   ├── main.ts           # Main action logic
 │   ├── helper.ts         # Helper functions for GitHub API interactions
 │   └── index.ts          # Action entrypoint
