@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import { CodeJSON } from "./model.js";
 import * as helpers from "./helper.js";
+import { stripOutdatedFields } from "./validation.js";
 
 const baselineCodeJSON: CodeJSON = {
   name: "",
@@ -158,6 +159,8 @@ export async function run(): Promise<void> {
         ...metaData,
       };
     }
+
+    finalCodeJSON = stripOutdatedFields(finalCodeJSON)
 
     core.info("Generated code.json successfully!");
 
