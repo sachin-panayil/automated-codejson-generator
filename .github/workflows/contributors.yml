@@ -17,45 +17,45 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Get contributors and check if update needed
+      - name: Check if update needed
         id: check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get current count
+          # Get current count from file
           CURRENT=$(perl -ne 'print $1 if /<!--CONTRIBUTOR COUNT START-->\s*(\d+)/' COMMUNITY.md)
           
-          # Get contributors (excluding bots)
-          CONTRIBUTORS=$(gh api "/repos/$GITHUB_REPOSITORY/contributors?per_page=100" | \
-            jq -r '[.[] | select(.type != "Bot" and (.login | test("\\[bot\\]$") | not) and (.login | test("-bot$") | not))] | 
-            map("<td align=\"center\">\n                <a href=\"\(.html_url)\">\n                    <img src=\"\(.avatar_url)\" width=\"100;\" alt=\"\(.login)\"/>\n                    <br />\n                    <sub><b>\(.login)</b></sub>\n                </a>\n            </td>") | join("\n            ")')
-          
-          ACTUAL=$(echo "$CONTRIBUTORS" | grep -c "<td align=" || echo 0)
+          # Get actual count from API
+          ACTUAL=$(gh api "/repos/$GITHUB_REPOSITORY/contributors?per_page=100" | \
+            jq '[.[] | select(.type != "Bot" and (.login | test("\\[bot\\]$") | not) and (.login | test("-bot$") | not))] | length')
           
           echo "Current: $CURRENT, Actual: $ACTUAL"
           
           if [ "$ACTUAL" != "$CURRENT" ]; then
             echo "needs_update=true" >> $GITHUB_OUTPUT
             echo "count=$ACTUAL" >> $GITHUB_OUTPUT
-            echo "contributors<<EOF" >> $GITHUB_OUTPUT
-            echo "$CONTRIBUTORS" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
           else
             echo "needs_update=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update COMMUNITY.md
+      - name: Update contributor list
+        if: steps.check.outputs.needs_update == 'true'
+        uses: akhilmhdh/contributors-readme-action@v2.3.10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          readme_path: COMMUNITY.md
+          use_username: false
+          commit_message: "update contributors information"
+
+      - name: Update contributor count
         if: steps.check.outputs.needs_update == 'true'
         run: |
           COUNT="${{ steps.check.outputs.count }}"
-          CONTRIBUTORS="${{ steps.check.outputs.contributors }}"
-          
-          # Update count
           perl -i -pe 's/(<!--CONTRIBUTOR COUNT START-->).*?(<!--CONTRIBUTOR COUNT END-->)/$1 '"$COUNT"' $2/' COMMUNITY.md
-          
-          # Update contributors table
-          perl -i -0777 -pe 's|(<!-- readme: contributors -start -->).*?(<!-- readme: contributors -end -->)|$1\n<table>\n\t<tbody>\n\t\t<tr>\n            '"$CONTRIBUTORS"'\n\t\t</tr>\n\t<tbody>\n</table>\n$2|s' COMMUNITY.md
 
       - name: Create Pull Request
         if: steps.check.outputs.needs_update == 'true'
@@ -65,9 +65,9 @@ jobs:
           commit-message: "docs: update contributors (count: ${{ steps.check.outputs.count }})"
           title: "docs: update contributors information"
           body: |
-            🎉 New contributor detected!
+            Automated contributor update - new contributor detected! 🎉
             
-            **Updated count:** ${{ steps.check.outputs.count }}
+            Updated count: ${{ steps.check.outputs.count }}
           branch: update-contributors
           delete-branch: true
           labels: documentation
