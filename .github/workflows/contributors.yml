@@ -53,7 +53,7 @@ jobs:
         if: steps.check.outputs.needs_update == 'true'
         run: |
           COUNT="${{ steps.check.outputs.count }}"
-          perl -i -pe 's/(<!--CONTRIBUTOR COUNT START-->).*?(<!--CONTRIBUTOR COUNT END-->)/$1 '"$COUNT"' $2/' MAINTAINERS.md
+          perl -i -pe 's/(<!--CONTRIBUTOR COUNT START-->).*?(<!--CONTRIBUTOR COUNT END-->)/$1 '"$COUNT"' $2/' COMMUNITY.md
 
       - name: Create Pull Request
         if: steps.check.outputs.needs_update == 'true'
