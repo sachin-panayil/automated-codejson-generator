@@ -43,9 +43,7 @@ This is expected behavior. If you need all updates to go through pull requests, 
 - No other repository restrictions
 
 ##### When It Falls Back to PR
-- Branch protection enabled (including admin enforcement)
-- Required status checks
-- Required pull request reviews
+- Any branch protection enabled 
 - Any push restrictions
 
 **Recommendation:** For repositories with branch protection, use `SKIP_PR: "false"` to always create pull requests.
