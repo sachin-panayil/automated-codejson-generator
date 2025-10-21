@@ -36,27 +36,8 @@ Scripting
 | approver | approve accepting contributions                | highly experienced and active reviewer + contributor to a sub-project             | MAINTAINERS file approver entry and GitHub Triage Team      |
 | lead     | set direction and priorities for a sub-project | demonstrated responsibility and excellent technical judgement for the sub-project | MAINTAINERS file owner entry and GitHub Org Admin Team      |
 
-Total number of contributors: <!--CONTRIBUTOR COUNT START--> 2 <!--CONTRIBUTOR COUNT END-->
+Total number of contributors: <!--CONTRIBUTOR COUNT START--> 0 <!--CONTRIBUTOR COUNT END-->
 
 <!-- readme: contributors -start -->
-<table>
-	<tbody>
-		<tr>
-            <td align="center">
-                <a href="https://github.com/sachin-panayil">
-                    <img src="https://avatars.githubusercontent.com/u/79382140?v=4" width="100;" alt="sachin-panayil"/>
-                    <br />
-                    <sub><b>Sachin Panayil</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/IsaacMilarky">
-                    <img src="https://avatars.githubusercontent.com/u/24639268?v=4" width="100;" alt="IsaacMilarky"/>
-                    <br />
-                    <sub><b>Isaac Milarsky</b></sub>
-                </a>
-            </td>
-		</tr>
-	<tbody>
-</table>
+
 <!-- readme: contributors -end -->
