@@ -48,6 +48,7 @@ jobs:
 
       - name: Update contributor list
         if: steps.check_changes.outputs.has_changes == 'true'
+        id: update_contributors
         uses: akhilmhdh/contributors-readme-action@v2.3.10
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
