@@ -2,7 +2,7 @@ FROM node:20-alpine
 
 RUN apk add --no-cache go git
 
-RUN go install github.com/boyter/scc/v3@latest
+RUN go install github.com/boyter/scc/v3@v3.4.0
 
 WORKDIR /action
 
