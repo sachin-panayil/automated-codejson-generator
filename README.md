@@ -1,4 +1,5 @@
 # Code.json Auto Generator
+###### _⚠️ Please update your action to v1.2.1 if your workflow is failing due to Docker builds within the action ⚠️_
 
 A GitHub Action that automatically generates and maintains code.json files for federal open source repositories, ensuring schema consistency and automating metadata calculations.
 
