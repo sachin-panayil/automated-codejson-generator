@@ -76,7 +76,7 @@ jobs:
 
       - name: Update code.json
         id: update
-        uses: DSACMS/automated-codejson-generator@v1.2.0
+        uses: DSACMS/automated-codejson-generator@v1.2.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ADMIN_TOKEN: ${{ secrets.ADMIN_PAT }} # PAT with admin/push permissions
@@ -123,7 +123,7 @@ jobs:
           fetch-depth: 0
 
       - name: Update code.json
-        uses: DSACMS/automated-codejson-generator@v1.2.0
+        uses: DSACMS/automated-codejson-generator@v1.2.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: "main"
